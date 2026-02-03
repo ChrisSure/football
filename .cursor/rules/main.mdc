@@ -1,0 +1,66 @@
+---
+description: Node.js + Express + TypeScript rules
+alwaysApply: true
+---
+# Cursor Rules — Node.js + Express + TypeScript
+
+## General Principles
+- Use TypeScript strictly (no `any`)
+- Prefer clarity over cleverness
+- Follow existing ESLint and Prettier rules
+- Do not introduce new dependencies without asking
+- Generate code that is easy to read and maintain
+
+## Language & Types
+- Always use explicit types for function parameters and return values
+- Use `unknown` instead of `any` when the type is not known
+- Prefer interfaces or type aliases for objects
+- Avoid type assertions (`as`) unless absolutely necessary
+
+## Node.js & Express
+- Use async/await for all asynchronous code
+- Do not use callbacks unless required by a library
+- Handle errors explicitly and consistently
+- Never swallow errors silently
+- Use centralized error handling middleware
+
+## Project Structure
+
+Suggested structure:
+- `/modules` — Modules
+    Inside modules
+      - `/core` — Core
+        Inside core
+          - `/types` — Types, Interfaces, Models
+          - `/constants` — Constants
+          - `/enums` — Constants
+          - `/services` - Services
+    module.ts - Main file of module
+- `/core` - Core
+  Inside core global things
+    - `/types` — Global Types, Interfaces, Models
+    - `/constants` — Global Constants
+    - `/enums` — Global Constants
+    - `/services` - Global Services
+    - `/providers` - Global providers
+
+## Code Style
+- Use named exports (no default exports)
+- Prefer early returns
+- Avoid deeply nested conditionals
+- Keep functions small (one responsibility)
+- Avoid magic numbers and strings
+
+## Formatting & Linting
+- Assume ESLint and Prettier are enabled
+- Do not disable lint rules unless explicitly asked
+- Generated code must pass linting without warnings
+
+## Testing
+- Do NOT generate unit or integration tests
+- Do NOT suggest testing libraries unless asked
+
+## Communication
+- If requirements are unclear, ask a clarifying question
+- Explain non-obvious decisions briefly
+- Do not over-explain simple code
