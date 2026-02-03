@@ -9,9 +9,9 @@ export class MySqlArticleRepository implements ArticleRepository {
     this.db = db;
   }
 
-  public async getAll(): Promise<readonly Article[]> {
-    const query: string = `SELECT * FROM ${ARTICLES_TABLE}`;
-    const result = await this.db.query(query);
+  public async getLastAll(hours: number): Promise<readonly Article[]> {
+    const query: string = `SELECT * FROM ${ARTICLES_TABLE} WHERE created_at >= NOW() - INTERVAL ? HOUR`;
+    const result = await this.db.query(query, [hours]);
 
     if (Array.isArray(result)) {
       return result as Article[];
