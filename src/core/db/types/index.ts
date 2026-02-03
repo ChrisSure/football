@@ -6,4 +6,4 @@ export type {
   Repository,
 } from './basic/db.types';
 export type { DbProvider, MySqlConfig } from './basic/db.provider.types';
-export type { Article } from './repository/article.types';
+export type { Article, ArticleRepository } from './repository/article.types';
