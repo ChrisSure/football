@@ -1,7 +1,6 @@
 import mysql, { type Pool } from 'mysql2/promise';
-
-import { getMySqlConfigFromEnv } from '../../constants/db/db.constants';
-import type { DbQueryParams, DbQueryResult, DbProvider, MySqlConfig } from '../../types';
+import { getMySqlConfigFromEnv } from '../constants/basic/db.constants';
+import type { DbQueryParams, DbQueryResult, DbProvider, MySqlConfig } from '../types';
 
 export class MySqlProvider implements DbProvider {
   private readonly config: MySqlConfig;
@@ -33,7 +32,7 @@ export class MySqlProvider implements DbProvider {
 
   public async query(statement: string, params: DbQueryParams = []): Promise<DbQueryResult> {
     if (!this.pool) {
-      throw new Error('Database provider is not connected.');
+      throw new Error('Database basic is not connected.');
     }
 
     const [rows] = await this.pool.execute(statement, params);
