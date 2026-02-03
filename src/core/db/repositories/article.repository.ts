@@ -10,7 +10,7 @@ export class MySqlArticleRepository implements ArticleRepository {
   }
 
   public async getLastAll(hours: number): Promise<readonly Article[]> {
-    const query: string = `SELECT * FROM ${ARTICLES_TABLE} WHERE created_at >= NOW() - INTERVAL ? HOUR`;
+    const query: string = `SELECT * FROM ${ARTICLES_TABLE} WHERE created >= NOW() - INTERVAL ? HOUR`;
     const result = await this.db.query(query, [hours]);
 
     if (Array.isArray(result)) {
