@@ -37,12 +37,12 @@ Suggested structure:
           - `/services` - Services
     module.ts - Main file of module
 - `/core` - Core
-  Inside core global things
-    - `/types` — Global Types, Interfaces, Models
-    - `/constants` — Global Constants
-    - `/enums` — Global Constants
-    - `/services` - Global Services
-    - `/providers` - Global providers
+  Inside core global things like db, queue, ai
+  All of this folder may contains
+    - `/types` — Types, Interfaces, Models
+    - `/constants` — Constants
+    - `/enums` — Constants
+    - `/services` - Services
 
 ## Code Style
 - Use named exports (no default exports)

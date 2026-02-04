@@ -14,8 +14,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bullmq": "^5.67.2",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "ioredis": "^5.9.2",
     "mysql2": "^3.16.2"
   },
   "devDependencies": {
