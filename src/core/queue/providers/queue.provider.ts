@@ -75,16 +75,13 @@ export const createSampleQueue = (
 export const createSampleWorker = (
   provider: QueueProvider,
 ): Worker<SampleJobData, SampleJobResult, string> => {
-  return provider.createWorker<SampleJobData, SampleJobResult>(
-    SAMPLE_QUEUE_NAME,
-    async (job) => {
-      const result: SampleJobResult = {
-        message: job.data.message,
-        processedAt: new Date().toISOString(),
-      };
-      return result;
-    },
-  );
+  return provider.createWorker<SampleJobData, SampleJobResult>(SAMPLE_QUEUE_NAME, async (job) => {
+    const result: SampleJobResult = {
+      message: job.data.message,
+      processedAt: new Date().toISOString(),
+    };
+    return result;
+  });
 };
 
 export { SAMPLE_QUEUE_NAME };
