@@ -1,6 +1,6 @@
-import type { QueueRedisConfig } from '../types';
+import type { CacheRedisConfig } from '../types';
 
-import { DEFAULT_EMPTY, DEFAULT_REDIS_DB, DEFAULT_REDIS_PORT } from '../constants/queue.constants';
+import { DEFAULT_EMPTY, DEFAULT_REDIS_DB, DEFAULT_REDIS_PORT } from '../constants/cache.constants';
 
 // TODO Move this methods to some common folder
 const parseNumber = (value: string | undefined): number | undefined => {
@@ -29,15 +29,15 @@ const emptyToUndefined = (value: string | undefined): string | undefined => {
 };
 // TODO Move this methods to some common folder
 
-export const getQueueRedisConfigFromEnv = (): QueueRedisConfig => {
-  const port: number = parseNumber(process.env.QUEUE_REDIS_PORT) ?? DEFAULT_REDIS_PORT;
-  const db: number = parseNumber(process.env.QUEUE_REDIS_DB) ?? DEFAULT_REDIS_DB;
-  const tlsEnabled: boolean = parseBoolean(process.env.QUEUE_REDIS_TLS);
+export const getCacheRedisConfigFromEnv = (): CacheRedisConfig => {
+  const port: number = parseNumber(process.env.CACHE_REDIS_PORT) ?? DEFAULT_REDIS_PORT;
+  const db: number = parseNumber(process.env.CACHE_REDIS_DB) ?? DEFAULT_REDIS_DB;
+  const tlsEnabled: boolean = parseBoolean(process.env.CACHE_REDIS_TLS);
 
   return {
-    host: process.env.QUEUE_REDIS_HOST ?? DEFAULT_EMPTY,
+    host: process.env.CACHE_REDIS_HOST ?? DEFAULT_EMPTY,
     port,
-    password: emptyToUndefined(process.env.QUEUE_REDIS_PASSWORD ?? DEFAULT_EMPTY),
+    password: emptyToUndefined(process.env.CACHE_REDIS_PASSWORD ?? DEFAULT_EMPTY),
     db,
     tls: tlsEnabled ? {} : undefined,
   };

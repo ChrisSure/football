@@ -1,6 +1,6 @@
-import type { Article, DbProvider } from '../types';
-import { ArticleRepository } from '../types/repository/article.types';
-import { ARTICLES_TABLE } from '../constants/repository/article.constant';
+import type { Article, DbProvider } from '../../types';
+import { ArticleRepository } from '../../types/repository/article.types';
+import { ARTICLES_TABLE } from '../../constants/repository/article.constant';
 
 export class MySqlArticleRepository implements ArticleRepository {
   private readonly db: DbProvider;
