@@ -9,6 +9,7 @@ export enum SourceStatus {
 export interface Source extends BaseModel<number> {
   id: number;
   title: string;
+  key: string;
   link: string;
   created: Date;
   status: SourceStatus;

@@ -1,33 +1,11 @@
 import type { QueueRedisConfig } from '../types';
 
-import { DEFAULT_EMPTY, DEFAULT_REDIS_DB, DEFAULT_REDIS_PORT } from '../constants/queue.constants';
-
-// TODO Move this methods to some common folder
-const parseNumber = (value: string | undefined): number | undefined => {
-  if (!value) {
-    return undefined;
-  }
-
-  const parsed: number = Number(value);
-  return Number.isNaN(parsed) ? undefined : parsed;
-};
-
-const parseBoolean = (value: string | undefined): boolean => {
-  if (!value) {
-    return false;
-  }
-
-  return value.toLowerCase() === 'true';
-};
-
-const emptyToUndefined = (value: string | undefined): string | undefined => {
-  if (!value) {
-    return undefined;
-  }
-
-  return value;
-};
-// TODO Move this methods to some common folder
+import {
+  DEFAULT_EMPTY,
+  DEFAULT_REDIS_DB,
+  DEFAULT_REDIS_PORT,
+} from '../constants/queue/queue.constants';
+import { emptyToUndefined, parseBoolean, parseNumber } from './env.helpers';
 
 export const getQueueRedisConfigFromEnv = (): QueueRedisConfig => {
   const port: number = parseNumber(process.env.QUEUE_REDIS_PORT) ?? DEFAULT_REDIS_PORT;
