@@ -1,6 +1,6 @@
 import type { Source, SourceRepository } from '../../core/db/types';
 import type { CollectorJobData, CollectorJobResult, QueueProvider } from '../../core/queue/types';
-import { FootballScrapper } from './scrappers/football/football.scrapper';
+import { FootballScraper } from './scrapers/football/football.scraper';
 import {
   COLLECTOR_QUEUE_NAME,
   COLLECTOR_REPEAT_INTERVAL,
@@ -33,7 +33,7 @@ export class Collector {
   private async processSource(source: Source): Promise<void> {
     switch (source.key) {
       case 'football': {
-        const scrapper = new FootballScrapper();
+        const scrapper = new FootballScraper();
         await scrapper.scrap(source);
         break;
       }
