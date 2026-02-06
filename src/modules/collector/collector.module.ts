@@ -1,5 +1,6 @@
 import type { Source, SourceRepository } from '../../core/db/types';
 import type { CollectorJobData, CollectorJobResult, QueueProvider } from '../../core/queue/types';
+import type { ScraperProvider } from '../../core/scraper/types';
 import { FootballScraper } from './scrapers/football/football.scraper';
 import {
   COLLECTOR_QUEUE_NAME,
@@ -10,10 +11,16 @@ import {
 export class Collector {
   private readonly sourceRepository: SourceRepository;
   private readonly queueProvider: QueueProvider;
+  private readonly scraperProvider: ScraperProvider;
 
-  public constructor(sourceRepository: SourceRepository, queueProvider: QueueProvider) {
+  public constructor(
+    sourceRepository: SourceRepository,
+    queueProvider: QueueProvider,
+    scraperProvider: ScraperProvider,
+  ) {
     this.sourceRepository = sourceRepository;
     this.queueProvider = queueProvider;
+    this.scraperProvider = scraperProvider;
   }
 
   public async start(): Promise<void> {
@@ -33,8 +40,8 @@ export class Collector {
   private async processSource(source: Source): Promise<void> {
     switch (source.key) {
       case 'football': {
-        const scrapper = new FootballScraper();
-        await scrapper.scrap(source);
+        const scraper = new FootballScraper(this.scraperProvider);
+        await scraper.scrap(source);
         break;
       }
       default:
