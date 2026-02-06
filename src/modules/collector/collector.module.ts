@@ -1,5 +1,6 @@
-import type { SourceRepository } from '../../core/db/types';
+import type { Source, SourceRepository } from '../../core/db/types';
 import type { CollectorJobData, CollectorJobResult, QueueProvider } from '../../core/queue/types';
+import { FootballScrapper } from './scrappers/football/football.scrapper';
 import {
   COLLECTOR_QUEUE_NAME,
   COLLECTOR_REPEAT_INTERVAL,
@@ -23,7 +24,23 @@ export class Collector {
 
   private async run(): Promise<void> {
     const sources = await this.sourceRepository.getLastActive();
-    console.log(sources);
+
+    for (const source of sources) {
+      await this.processSource(source);
+    }
+  }
+
+  private async processSource(source: Source): Promise<void> {
+    switch (source.key) {
+      case 'football': {
+        const scrapper = new FootballScrapper();
+        await scrapper.scrap(source);
+        break;
+      }
+      default:
+        console.warn(`Unknown source key: ${source.key}`);
+        break;
+    }
   }
 
   private registerWorker(): void {
