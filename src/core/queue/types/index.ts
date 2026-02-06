@@ -1,3 +1,4 @@
+export type { CollectorJobData, CollectorJobResult } from './collector/collector.types';
 export type {
   QueueOptionsInput,
   QueueProcessor,
@@ -6,4 +7,4 @@ export type {
   SampleJobData,
   SampleJobResult,
   WorkerOptionsInput,
-} from './queue.types';
+} from './queue/queue.types';

@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import { createDbProvider } from './core/db/providers';
+import type { DbProvider } from './core/db/types';
 import { MySqlSourceRepository } from './core/db/repositories';
+import { createQueueProvider } from './core/queue/providers';
 import { Collector } from './modules/collector';
 
 export const app = express();
@@ -10,12 +12,17 @@ app.get('/', (_req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
-const startCollector = async (): Promise<void> => {
+const initDatabase = async (): Promise<DbProvider> => {
   const db = createDbProvider();
   await db.connect();
+  return db;
+};
 
+const startCollector = async (): Promise<void> => {
+  const db = await initDatabase();
   const sourceRepository = new MySqlSourceRepository(db);
-  const collector = new Collector(sourceRepository);
+  const queueProvider = createQueueProvider();
+  const collector = new Collector(sourceRepository, queueProvider);
   await collector.start();
 };
 
