@@ -4,6 +4,7 @@ import { createDbProvider } from './core/db/providers';
 import type { DbProvider } from './core/db/types';
 import { MySqlSourceRepository } from './core/db/repositories';
 import { createQueueProvider } from './core/queue/providers';
+import { createScraperProvider } from './core/scraper/providers';
 import { Collector } from './modules/collector';
 
 export const app = express();
@@ -22,7 +23,8 @@ const startCollector = async (): Promise<void> => {
   const db = await initDatabase();
   const sourceRepository = new MySqlSourceRepository(db);
   const queueProvider = createQueueProvider();
-  const collector = new Collector(sourceRepository, queueProvider);
+  const scraperProvider = createScraperProvider();
+  const collector = new Collector(sourceRepository, queueProvider, scraperProvider);
   await collector.start();
 };
 

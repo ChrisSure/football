@@ -1,6 +1,9 @@
 import type { Source, SourceRepository } from '../../core/db/types';
 import type { CollectorJobData, CollectorJobResult, QueueProvider } from '../../core/queue/types';
-import { FootballScrapper } from './scrappers/football/football.scrapper';
+import type { ScraperProvider } from '../../core/scraper/types';
+import { SourceKey } from './enums';
+import { FootballScraper } from './scrapers/football/football.scraper';
+import type { Article } from './types/scraper.types';
 import {
   COLLECTOR_QUEUE_NAME,
   COLLECTOR_REPEAT_INTERVAL,
@@ -10,10 +13,16 @@ import {
 export class Collector {
   private readonly sourceRepository: SourceRepository;
   private readonly queueProvider: QueueProvider;
+  private readonly scraperProvider: ScraperProvider;
 
-  public constructor(sourceRepository: SourceRepository, queueProvider: QueueProvider) {
+  public constructor(
+    sourceRepository: SourceRepository,
+    queueProvider: QueueProvider,
+    scraperProvider: ScraperProvider,
+  ) {
     this.sourceRepository = sourceRepository;
     this.queueProvider = queueProvider;
+    this.scraperProvider = scraperProvider;
   }
 
   public async start(): Promise<void> {
@@ -24,22 +33,25 @@ export class Collector {
 
   private async run(): Promise<void> {
     const sources = await this.sourceRepository.getLastActive();
+    const articles: Article[] = [];
 
     for (const source of sources) {
-      await this.processSource(source);
+      const result = await this.processSource(source);
+      articles.push(...result);
     }
+
+    console.log(articles);
   }
 
-  private async processSource(source: Source): Promise<void> {
+  private async processSource(source: Source): Promise<Article[]> {
     switch (source.key) {
-      case 'football': {
-        const scrapper = new FootballScrapper();
-        await scrapper.scrap(source);
-        break;
+      case SourceKey.Football: {
+        const scraper = new FootballScraper(this.scraperProvider);
+        return scraper.scrap(source);
       }
       default:
         console.warn(`Unknown source key: ${source.key}`);
-        break;
+        return [];
     }
   }
 
