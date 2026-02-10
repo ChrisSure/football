@@ -1,5 +1,7 @@
 export interface CollectorJobData {
-  triggeredAt: string;
+  title: string;
+  image: string;
+  source: string;
 }
 
 export interface CollectorJobResult {

@@ -1,19 +1,26 @@
 import type { Source, SourceRepository } from '../../core/db/types';
-import type { CollectorJobData, CollectorJobResult, QueueProvider } from '../../core/queue/types';
+import type {
+  CollectorJobData,
+  CollectorJobResult,
+  QueueProvider,
+  TimerJobData,
+  TimerJobResult,
+} from '../../core/queue/types';
 import type { ScraperProvider } from '../../core/scraper/types';
 import { SourceKey } from './enums';
 import { FootballScraper } from './scrapers/football/football.scraper';
-import type { Article } from './types/scraper.types';
+import type { ArticleQueue } from './types/scraper.types';
+import { COLLECTOR_QUEUE_NAME } from '../../core/queue/constants/collector/collector.constant';
 import {
-  COLLECTOR_QUEUE_NAME,
-  COLLECTOR_REPEAT_INTERVAL,
   COLLECTOR_REPEAT_INTERVAL_1_MIN,
-} from '../../core/queue/constants/collector/collector.constants';
+  TIMER_QUEUE_NAME,
+} from '../../core/queue/constants/timer/timer.constant';
 
 export class Collector {
   private readonly sourceRepository: SourceRepository;
   private readonly queueProvider: QueueProvider;
   private readonly scraperProvider: ScraperProvider;
+  private readonly articleQueue: ArticleQueue;
 
   public constructor(
     sourceRepository: SourceRepository,
@@ -23,6 +30,9 @@ export class Collector {
     this.sourceRepository = sourceRepository;
     this.queueProvider = queueProvider;
     this.scraperProvider = scraperProvider;
+    this.articleQueue = this.queueProvider.createQueue<CollectorJobData, CollectorJobResult>(
+      COLLECTOR_QUEUE_NAME,
+    );
   }
 
   public async start(): Promise<void> {
@@ -33,42 +43,33 @@ export class Collector {
 
   private async run(): Promise<void> {
     const sources = await this.sourceRepository.getLastActive();
-    const articles: Article[] = [];
 
     for (const source of sources) {
-      const result = await this.processSource(source);
-      articles.push(...result);
+      await this.processSource(source);
     }
-
-    console.log(articles);
   }
 
-  private async processSource(source: Source): Promise<Article[]> {
+  private async processSource(source: Source): Promise<void> {
     switch (source.key) {
       case SourceKey.Football: {
-        const scraper = new FootballScraper(this.scraperProvider);
-        return scraper.scrap(source);
+        const scraper = new FootballScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
       }
       default:
         console.warn(`Unknown source key: ${source.key}`);
-        return [];
     }
   }
 
   private registerWorker(): void {
-    this.queueProvider.createWorker<CollectorJobData, CollectorJobResult>(
-      COLLECTOR_QUEUE_NAME,
-      async () => {
-        await this.run();
-        return { processedAt: new Date().toISOString() };
-      },
-    );
+    this.queueProvider.createWorker<TimerJobData, TimerJobResult>(TIMER_QUEUE_NAME, async () => {
+      await this.run();
+      return { processedAt: new Date().toISOString() };
+    });
   }
 
   private async scheduleRepeatableJob(): Promise<void> {
-    const queue = this.queueProvider.createQueue<CollectorJobData, CollectorJobResult>(
-      COLLECTOR_QUEUE_NAME,
-    );
+    const queue = this.queueProvider.createQueue<TimerJobData, TimerJobResult>(TIMER_QUEUE_NAME);
 
     await queue.add(
       'collector-run',
