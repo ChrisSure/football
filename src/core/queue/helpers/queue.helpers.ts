@@ -4,7 +4,7 @@ import {
   DEFAULT_EMPTY,
   DEFAULT_REDIS_DB,
   DEFAULT_REDIS_PORT,
-} from '../constants/queue/queue.constants';
+} from '../constants/queue/queue.constant';
 import { emptyToUndefined, parseBoolean, parseNumber } from './env.helpers';
 
 export const getQueueRedisConfigFromEnv = (): QueueRedisConfig => {

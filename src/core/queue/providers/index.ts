@@ -4,11 +4,13 @@ export {
   createSampleQueue,
   createSampleWorker,
 } from './queue.provider';
-export { SAMPLE_QUEUE_NAME } from '../constants/queue/queue.constants';
+export { SAMPLE_QUEUE_NAME } from '../constants/queue/queue.constant';
+export { COLLECTOR_QUEUE_NAME } from '../constants/collector/collector.constant';
 export {
-  COLLECTOR_QUEUE_NAME,
+  TIMER_QUEUE_NAME,
   COLLECTOR_REPEAT_INTERVAL,
-} from '../constants/collector/collector.constants';
+  COLLECTOR_REPEAT_INTERVAL_1_MIN,
+} from '../constants/timer/timer.constant';
 export { getQueueRedisConfigFromEnv } from '../helpers/queue.helpers';
 export type { QueueProvider, QueueRedisConfig } from '../types';
 export type {
@@ -16,4 +18,6 @@ export type {
   CollectorJobResult,
   SampleJobData,
   SampleJobResult,
+  TimerJobData,
+  TimerJobResult,
 } from '../types';

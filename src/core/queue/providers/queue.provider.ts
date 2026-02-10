@@ -1,6 +1,6 @@
 import { Queue, Worker } from 'bullmq';
 
-import { SAMPLE_QUEUE_NAME } from '../constants/queue/queue.constants';
+import { SAMPLE_QUEUE_NAME } from '../constants/queue/queue.constant';
 import { getQueueRedisConfigFromEnv } from '../helpers/queue.helpers';
 import type {
   QueueOptionsInput,
