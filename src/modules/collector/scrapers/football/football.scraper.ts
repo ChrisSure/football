@@ -20,7 +20,8 @@ export class FootballScraper implements Scraper {
       links.map(async (link) => {
         const article = await this.parseArticle(link, source.title);
         console.log(article, 'article');
-        await this.enqueueArticle(article);
+        // TODO Temporary commented to not save a lot of data to queue
+        //await this.enqueueArticle(article);
       }),
     );
   }

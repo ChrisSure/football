@@ -35,7 +35,7 @@ const startCollector = async (db: DbProvider, queueProvider: QueueProvider): Pro
 const startDeduplicator = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
   const articleRepository = new MySqlArticleRepository(db);
   const deduplicator = new Deduplicator(articleRepository, queueProvider);
-  deduplicator.start();
+  await deduplicator.start();
 };
 
 export const startServer = async (): Promise<void> => {

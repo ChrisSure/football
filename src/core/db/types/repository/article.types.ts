@@ -5,5 +5,5 @@ export interface Article extends BaseModel<EntityId> {
 }
 
 export interface ArticleRepository {
-  getLastAll(hours: number): Promise<readonly Article[]>;
+  getLastActiveAll(hours: number): Promise<readonly Article[]>;
 }

@@ -1,6 +1,7 @@
 import type { Article, DbProvider } from '../../types';
-import { ArticleRepository } from '../../types/repository/article.types';
+import { ArticleRepository } from '../../types';
 import { ARTICLES_TABLE } from '../../constants/repository/article.constant';
+import { ArticleStatus } from '../../enums';
 
 export class MySqlArticleRepository implements ArticleRepository {
   private readonly db: DbProvider;
@@ -9,9 +10,9 @@ export class MySqlArticleRepository implements ArticleRepository {
     this.db = db;
   }
 
-  public async getLastAll(hours: number): Promise<readonly Article[]> {
-    const query: string = `SELECT * FROM ${ARTICLES_TABLE} WHERE created >= NOW() - INTERVAL ? HOUR`;
-    const result = await this.db.query(query, [hours]);
+  public async getLastActiveAll(hours: number): Promise<readonly Article[]> {
+    const query: string = `SELECT * FROM ${ARTICLES_TABLE} WHERE created >= NOW() - INTERVAL ? HOUR AND status = ?`;
+    const result = await this.db.query(query, [hours, ArticleStatus.Published]);
 
     if (Array.isArray(result)) {
       return result as Article[];
