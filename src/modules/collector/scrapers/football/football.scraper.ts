@@ -19,9 +19,7 @@ export class FootballScraper implements Scraper {
     await Promise.all(
       links.map(async (link) => {
         const article = await this.parseArticle(link, source.title);
-        console.log(article, 'article');
-        // TODO Temporary commented to not save a lot of data to queue
-        //await this.enqueueArticle(article);
+        await this.enqueueArticle(article);
       }),
     );
   }
