@@ -9,6 +9,7 @@ import { createScraperProvider } from './core/scraper/providers';
 import { Collector } from './modules/collector';
 import { createAiProvider } from './core/ai/providers';
 import { Deduplicator, AiDeduplicatorService } from './modules/deduplicator';
+import { Rewriter } from './modules/rewriter';
 
 export const app = express();
 
@@ -41,12 +42,18 @@ const startDeduplicator = async (db: DbProvider, queueProvider: QueueProvider): 
   await deduplicator.start();
 };
 
+const startRewriter = async (queueProvider: QueueProvider): Promise<void> => {
+  const rewriter = new Rewriter(queueProvider);
+  await rewriter.start();
+};
+
 export const startServer = async (): Promise<void> => {
   const db = await initDatabase();
   const queueProvider = initQueueProvider();
 
   await startCollector(db, queueProvider);
   await startDeduplicator(db, queueProvider);
+  await startRewriter(queueProvider);
 
   const port: number = Number(process.env.PORT ?? 3000);
 
