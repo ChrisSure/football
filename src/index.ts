@@ -7,7 +7,6 @@ import { createQueueProvider } from './core/queue/providers';
 import type { QueueProvider } from './core/queue/types';
 import { createScraperProvider } from './core/scraper/providers';
 import { Collector } from './modules/collector';
-import { ArticleFilterService } from './core/filter';
 import { createAiProvider } from './core/ai/providers';
 import { Deduplicator, AiDeduplicatorService } from './modules/deduplicator';
 
@@ -36,15 +35,9 @@ const startCollector = async (db: DbProvider, queueProvider: QueueProvider): Pro
 
 const startDeduplicator = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
   const articleRepository = new MySqlArticleRepository(db);
-  const articleFilter = new ArticleFilterService();
   const aiProvider = createAiProvider();
   const deduplicatorService = new AiDeduplicatorService(aiProvider);
-  const deduplicator = new Deduplicator(
-    articleRepository,
-    queueProvider,
-    articleFilter,
-    deduplicatorService,
-  );
+  const deduplicator = new Deduplicator(articleRepository, queueProvider, deduplicatorService);
   await deduplicator.start();
 };
 

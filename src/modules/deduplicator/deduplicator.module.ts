@@ -1,6 +1,5 @@
 import type { Job, Queue } from 'bullmq';
 import type { Article, ArticleRepository } from '../../core/db/types';
-import type { ArticleFilter } from '../../core/filter';
 import type {
   CollectorJobData,
   CollectorJobResult,
@@ -11,23 +10,23 @@ import type {
 import { COLLECTOR_QUEUE_NAME } from '../../core/queue/constants/collector/collector.constant';
 import { FILTERED_QUEUE_NAME } from '../../core/queue/constants/filtered/filtered.constant';
 import type { DeduplicatorService } from './types';
+import { ArticleFilterService } from './services/article-filter.service';
 
 export class Deduplicator {
   private readonly articleRepository: ArticleRepository;
   private readonly queueProvider: QueueProvider;
-  private readonly articleFilter: ArticleFilter;
+  private readonly articleFilter: ArticleFilterService;
   private readonly deduplicatorService: DeduplicatorService;
   private readonly filteredQueue: Queue<FilteredJobData, FilteredJobResult, string>;
 
   public constructor(
     articleRepository: ArticleRepository,
     queueProvider: QueueProvider,
-    articleFilter: ArticleFilter,
     deduplicatorService: DeduplicatorService,
   ) {
     this.articleRepository = articleRepository;
     this.queueProvider = queueProvider;
-    this.articleFilter = articleFilter;
+    this.articleFilter = new ArticleFilterService();
     this.deduplicatorService = deduplicatorService;
     this.filteredQueue = this.queueProvider.createQueue<FilteredJobData, FilteredJobResult>(
       FILTERED_QUEUE_NAME,
