@@ -2,10 +2,14 @@ import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import { createDbProvider } from './core/db/providers';
 import type { DbProvider } from './core/db/types';
-import { MySqlSourceRepository } from './core/db/repositories';
+import { MySqlArticleRepository, MySqlSourceRepository } from './core/db/repositories';
 import { createQueueProvider } from './core/queue/providers';
+import type { QueueProvider } from './core/queue/types';
 import { createScraperProvider } from './core/scraper/providers';
 import { Collector } from './modules/collector';
+import { ArticleFilterService } from './core/filter';
+import { createAiProvider } from './core/ai/providers';
+import { Deduplicator, AiDeduplicatorService } from './modules/deduplicator';
 
 export const app = express();
 
@@ -19,17 +23,37 @@ const initDatabase = async (): Promise<DbProvider> => {
   return db;
 };
 
-const startCollector = async (): Promise<void> => {
-  const db = await initDatabase();
+const initQueueProvider = (): QueueProvider => {
+  return createQueueProvider();
+};
+
+const startCollector = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
   const sourceRepository = new MySqlSourceRepository(db);
-  const queueProvider = createQueueProvider();
   const scraperProvider = createScraperProvider();
   const collector = new Collector(sourceRepository, queueProvider, scraperProvider);
   await collector.start();
 };
 
+const startDeduplicator = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
+  const articleRepository = new MySqlArticleRepository(db);
+  const articleFilter = new ArticleFilterService();
+  const aiProvider = createAiProvider();
+  const deduplicatorService = new AiDeduplicatorService(aiProvider);
+  const deduplicator = new Deduplicator(
+    articleRepository,
+    queueProvider,
+    articleFilter,
+    deduplicatorService,
+  );
+  await deduplicator.start();
+};
+
 export const startServer = async (): Promise<void> => {
-  await startCollector();
+  const db = await initDatabase();
+  const queueProvider = initQueueProvider();
+
+  await startCollector(db, queueProvider);
+  await startDeduplicator(db, queueProvider);
 
   const port: number = Number(process.env.PORT ?? 3000);
 
@@ -38,4 +62,4 @@ export const startServer = async (): Promise<void> => {
   });
 };
 
-startServer();
+startServer().then();

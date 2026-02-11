@@ -36,6 +36,7 @@ export class Collector {
   }
 
   public async start(): Promise<void> {
+    // TODO Temporary commented timer
     //await this.scheduleRepeatableJob();
     //this.registerWorker();
     await this.run();
