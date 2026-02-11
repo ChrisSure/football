@@ -27,6 +27,7 @@ export const POLITICS_KEYWORDS: readonly string[] = [
   'мандат',
   'фракці',
   'коаліці',
+  'банк',
 ];
 
 export const WAR_KEYWORDS: readonly string[] = [
