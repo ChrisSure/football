@@ -48,16 +48,9 @@ export class Rewriter {
   private async processJob(
     job: Job<FilteredJobData, FilteredJobResult>,
   ): Promise<FilteredJobResult> {
-    console.log(`[Rewriter] Processing job ${job.id}:`, job.data);
-
     const rewrittenTitle = await this.rewriterService.rewriteTitle(job.data.title);
-
-    console.log(`[Rewriter] Original: "${job.data.title}" -> Rewritten: "${rewrittenTitle}"`);
-
     const article = this.buildArticle(rewrittenTitle, job.data);
-
     await this.saveArticle(article);
-
     return { processedAt: new Date().toISOString(), rewrittenTitle };
   }
 
@@ -75,7 +68,6 @@ export class Rewriter {
 
   private async saveArticle(article: Omit<Article, 'id' | 'created'>): Promise<void> {
     await this.articleRepository.create(article);
-
     await this.finalQueue.add('article', {
       title: article.title,
       image: article.image,
