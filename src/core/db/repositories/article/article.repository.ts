@@ -20,4 +20,9 @@ export class MySqlArticleRepository implements ArticleRepository {
 
     return [];
   }
+
+  public async create(data: Omit<Article, 'id' | 'created'>): Promise<void> {
+    const query: string = `INSERT INTO ${ARTICLES_TABLE} (title, image, source, status) VALUES (?, ?, ?, ?)`;
+    await this.db.query(query, [data.title, data.image, data.source, data.status]);
+  }
 }

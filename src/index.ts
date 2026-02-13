@@ -42,8 +42,9 @@ const startDeduplicator = async (db: DbProvider, queueProvider: QueueProvider): 
   await deduplicator.start();
 };
 
-const startRewriter = async (queueProvider: QueueProvider): Promise<void> => {
-  const rewriter = new Rewriter(queueProvider);
+const startRewriter = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
+  const aiProvider = createAiProvider();
+  const rewriter = new Rewriter(queueProvider, aiProvider);
   await rewriter.start();
 };
 
@@ -53,7 +54,7 @@ export const startServer = async (): Promise<void> => {
 
   await startCollector(db, queueProvider);
   await startDeduplicator(db, queueProvider);
-  await startRewriter(queueProvider);
+  await startRewriter(db, queueProvider);
 
   const port: number = Number(process.env.PORT ?? 3000);
 

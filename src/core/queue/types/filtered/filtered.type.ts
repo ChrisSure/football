@@ -6,4 +6,5 @@ export interface FilteredJobData {
 
 export interface FilteredJobResult {
   processedAt: string;
+  rewrittenTitle?: string;
 }
