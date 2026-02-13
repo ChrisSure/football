@@ -10,6 +10,8 @@ import { Collector } from './modules/collector';
 import { createAiProvider } from './core/ai/providers';
 import { Deduplicator, AiDeduplicatorService } from './modules/deduplicator';
 import { Rewriter } from './modules/rewriter';
+import { Sender } from './modules/sender';
+import { createTelegramProvider } from './core/telegram/providers';
 
 export const app = express();
 
@@ -49,6 +51,12 @@ const startRewriter = async (db: DbProvider, queueProvider: QueueProvider): Prom
   await rewriter.start();
 };
 
+const startSender = async (queueProvider: QueueProvider): Promise<void> => {
+  const telegramProvider = createTelegramProvider();
+  const sender = new Sender(queueProvider, telegramProvider);
+  await sender.start();
+};
+
 export const startServer = async (): Promise<void> => {
   const db = await initDatabase();
   const queueProvider = initQueueProvider();
@@ -56,6 +64,7 @@ export const startServer = async (): Promise<void> => {
   await startCollector(db, queueProvider);
   await startDeduplicator(db, queueProvider);
   await startRewriter(db, queueProvider);
+  await startSender(queueProvider);
 
   const port: number = Number(process.env.PORT ?? 3000);
 
