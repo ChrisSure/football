@@ -43,8 +43,9 @@ const startDeduplicator = async (db: DbProvider, queueProvider: QueueProvider): 
 };
 
 const startRewriter = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
+  const articleRepository = new MySqlArticleRepository(db);
   const aiProvider = createAiProvider();
-  const rewriter = new Rewriter(queueProvider, aiProvider);
+  const rewriter = new Rewriter(articleRepository, queueProvider, aiProvider);
   await rewriter.start();
 };
 
