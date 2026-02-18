@@ -51,9 +51,10 @@ const startRewriter = async (db: DbProvider, queueProvider: QueueProvider): Prom
   await rewriter.start();
 };
 
-const startSender = async (queueProvider: QueueProvider): Promise<void> => {
+const startSender = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
+  const articleRepository = new MySqlArticleRepository(db);
   const telegramProvider = createTelegramProvider();
-  const sender = new Sender(queueProvider, telegramProvider);
+  const sender = new Sender(articleRepository, queueProvider, telegramProvider);
   await sender.start();
 };
 
@@ -64,7 +65,7 @@ export const startServer = async (): Promise<void> => {
   await startCollector(db, queueProvider);
   await startDeduplicator(db, queueProvider);
   await startRewriter(db, queueProvider);
-  await startSender(queueProvider);
+  await startSender(db, queueProvider);
 
   const port: number = Number(process.env.PORT ?? 3000);
 

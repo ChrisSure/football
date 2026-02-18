@@ -25,4 +25,9 @@ export class MySqlArticleRepository implements ArticleRepository {
     const query: string = `INSERT INTO ${ARTICLES_TABLE} (title, image, source, status) VALUES (?, ?, ?, ?)`;
     await this.db.query(query, [data.title, data.image, data.source, data.status]);
   }
+
+  public async updateLastStatuses(hours: number): Promise<void> {
+    const query: string = `UPDATE ${ARTICLES_TABLE} SET status = ? WHERE created >= NOW() - INTERVAL ? HOUR`;
+    await this.db.query(query, [ArticleStatus.Published, hours]);
+  }
 }

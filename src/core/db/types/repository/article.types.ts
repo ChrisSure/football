@@ -13,4 +13,5 @@ export interface Article extends BaseModel<EntityId> {
 export interface ArticleRepository {
   getLastActiveAll(hours: number): Promise<readonly Article[]>;
   create(data: Omit<Article, 'id' | 'created'>): Promise<void>;
+  updateLastStatuses(hours: number): Promise<void>;
 }
