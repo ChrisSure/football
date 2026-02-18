@@ -1,12 +1,24 @@
 import type { AiProvider } from '../../../core/ai/types';
+import { getOpenAiConfigFromEnv } from '../../../core/ai/constants/ai.constant';
 import type { DeduplicatorService } from '../types';
-import { EMBEDDING_MODEL, SIMILARITY_THRESHOLD } from '../constants/deduplicator.constant';
+import {
+  EMBEDDING_MODEL,
+  SIMILARITY_THRESHOLD,
+  CANDIDATE_THRESHOLD,
+  DEDUPLICATOR_SYSTEM_PROMPT,
+} from '../constants/deduplicator.constant';
+
+interface LlmVerificationResponse {
+  isDuplicate: boolean;
+}
 
 export class AiDeduplicatorService implements DeduplicatorService {
   private readonly aiProvider: AiProvider;
+  private readonly model: string;
 
   public constructor(aiProvider: AiProvider) {
     this.aiProvider = aiProvider;
+    this.model = getOpenAiConfigFromEnv().model;
   }
 
   public async isDuplicate(title: string, existingTitles: readonly string[]): Promise<boolean> {
@@ -18,15 +30,51 @@ export class AiDeduplicatorService implements DeduplicatorService {
     const embeddings = await this.getEmbeddings(allTitles);
     const newTitleEmbedding = embeddings[0];
 
+    const candidates: string[] = [];
+
     for (let i = 1; i < embeddings.length; i++) {
       const similarity = this.cosineSimilarity(newTitleEmbedding, embeddings[i]);
 
       if (similarity >= SIMILARITY_THRESHOLD) {
         return true;
       }
+
+      if (similarity >= CANDIDATE_THRESHOLD) {
+        candidates.push(existingTitles[i - 1]);
+      }
     }
 
-    return false;
+    if (candidates.length === 0) {
+      return false;
+    }
+
+    return this.verifyWithLlm(title, candidates);
+  }
+
+  private async verifyWithLlm(title: string, candidateTitles: readonly string[]): Promise<boolean> {
+    const numberedTitles = candidateTitles.map((t, i) => `${i + 1}. ${t}`).join('\n');
+
+    const userMessage = `New title: ${title}\n\nExisting titles:\n${numberedTitles}`;
+
+    const response = await this.aiProvider.client.chat.completions.create({
+      model: this.model,
+      messages: [
+        { role: 'system', content: DEDUPLICATOR_SYSTEM_PROMPT },
+        { role: 'user', content: userMessage },
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0,
+    });
+
+    const content = response.choices[0]?.message?.content?.trim();
+
+    if (!content) {
+      return false;
+    }
+
+    const parsed: LlmVerificationResponse = JSON.parse(content);
+
+    return parsed.isDuplicate;
   }
 
   private async getEmbeddings(texts: readonly string[]): Promise<readonly number[][]> {

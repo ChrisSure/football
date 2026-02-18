@@ -1,5 +1,6 @@
 export type { CollectorJobData, CollectorJobResult } from './collector/collector.type';
 export type { FilteredJobData, FilteredJobResult } from './filtered/filtered.type';
+export type { FinalJobData, FinalJobResult } from './final/final.type';
 export type { TimerJobData, TimerJobResult } from './timer/timer.type';
 export type {
   QueueOptionsInput,
