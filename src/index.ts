@@ -1,17 +1,11 @@
 import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import { createDbProvider } from './core/db/providers';
+import { logger } from './core/logger';
 import type { DbProvider } from './core/db/types';
-import { MySqlArticleRepository, MySqlSourceRepository } from './core/db/repositories';
 import { createQueueProvider } from './core/queue/providers';
 import type { QueueProvider } from './core/queue/types';
-import { createScraperProvider } from './core/scraper/providers';
-import { Collector } from './modules/collector';
-import { createAiProvider } from './core/ai/providers';
-import { Deduplicator, AiDeduplicatorService } from './modules/deduplicator';
-import { Rewriter } from './modules/rewriter';
-import { Sender } from './modules/sender';
-import { createTelegramProvider } from './core/telegram/providers';
+import { startCollector, startDeduplicator, startRewriter, startSender } from './starters';
 
 export const app = express();
 
@@ -29,48 +23,22 @@ const initQueueProvider = (): QueueProvider => {
   return createQueueProvider();
 };
 
-const startCollector = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
-  const sourceRepository = new MySqlSourceRepository(db);
-  const scraperProvider = createScraperProvider();
-  const collector = new Collector(sourceRepository, queueProvider, scraperProvider);
-  await collector.start();
-};
-
-const startDeduplicator = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
-  const articleRepository = new MySqlArticleRepository(db);
-  const aiProvider = createAiProvider();
-  const deduplicatorService = new AiDeduplicatorService(aiProvider);
-  const deduplicator = new Deduplicator(articleRepository, queueProvider, deduplicatorService);
-  await deduplicator.start();
-};
-
-const startRewriter = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
-  const articleRepository = new MySqlArticleRepository(db);
-  const aiProvider = createAiProvider();
-  const rewriter = new Rewriter(articleRepository, queueProvider, aiProvider);
-  await rewriter.start();
-};
-
-const startSender = async (db: DbProvider, queueProvider: QueueProvider): Promise<void> => {
-  const articleRepository = new MySqlArticleRepository(db);
-  const telegramProvider = createTelegramProvider();
-  const sender = new Sender(articleRepository, queueProvider, telegramProvider);
-  await sender.start();
-};
-
 export const startServer = async (): Promise<void> => {
-  const db = await initDatabase();
-  const queueProvider = initQueueProvider();
+  try {
+    const db = await initDatabase();
+    const queueProvider = initQueueProvider();
 
-  await startCollector(db, queueProvider);
-  await startDeduplicator(db, queueProvider);
-  await startRewriter(db, queueProvider);
-  await startSender(db, queueProvider);
+    await startCollector(db, queueProvider);
+    await startDeduplicator(db, queueProvider);
+    await startRewriter(db, queueProvider);
+    await startSender(db, queueProvider);
+  } catch (err: unknown) {
+    logger.error(`${err}`);
+  }
 
   const port: number = Number(process.env.PORT ?? 3000);
-
   app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    logger.info(`Server running on port ${port}`);
   });
 };
 

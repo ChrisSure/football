@@ -16,10 +16,18 @@ export class FootballScraper implements Scraper {
     const $ = await this.scraperProvider.getPage(source.link);
     const links = this.extractLinks($);
 
+    if (links.length) {
+      await this.processLinks(links, source.title);
+    }
+  }
+
+  private async processLinks(links: string[], sourceTitle: string): Promise<void> {
     await Promise.all(
       links.map(async (link) => {
-        const article = await this.parseArticle(link, source.title);
-        await this.enqueueArticle(article);
+        const article = await this.parseArticle(link, sourceTitle);
+        if (article) {
+          await this.enqueueArticle(article);
+        }
       }),
     );
   }
@@ -41,10 +49,14 @@ export class FootballScraper implements Scraper {
     return links;
   }
 
-  private async parseArticle(link: string, sourceName: string): Promise<Article> {
+  private async parseArticle(link: string, sourceName: string): Promise<Article | null> {
     const page = await this.scraperProvider.getPage(link);
-    const title = page('.author-article h1').html() || '';
-    const image = page('.author-article .article-photo img').attr('src') || '';
+    const title = page('.author-article h1').html() ?? '';
+    const image = page('.author-article .article-photo img').attr('src') ?? '';
+
+    if (!title || !image) {
+      return null;
+    }
 
     return { title, image, source: sourceName };
   }

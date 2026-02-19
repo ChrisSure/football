@@ -1,4 +1,5 @@
 import type { Source, SourceRepository } from '../../core/db/types';
+import { logger } from '../../core/logger';
 import type {
   CollectorJobData,
   CollectorJobResult,
@@ -45,8 +46,12 @@ export class Collector {
   private async run(): Promise<void> {
     const sources = await this.sourceRepository.getLastActive();
 
-    for (const source of sources) {
-      await this.processSource(source);
+    if (sources.length) {
+      for (const source of sources) {
+        await this.processSource(source);
+      }
+    } else {
+      logger.warn('Sources not found');
     }
   }
 
@@ -58,7 +63,7 @@ export class Collector {
         break;
       }
       default:
-        console.warn(`Unknown source key: ${source.key}`);
+        logger.warn({ sourceKey: source.key }, 'Unknown source key');
     }
   }
 

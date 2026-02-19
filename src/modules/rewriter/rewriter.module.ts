@@ -18,7 +18,7 @@ export class Rewriter {
   private readonly queueProvider: QueueProvider;
   private readonly rewriterService: RewriterService;
   private readonly articleRepository: ArticleRepository;
-  private readonly finalQueue: Queue<FinalJobData, FinalJobResult, string>;
+  private readonly finalQueue: Queue<FinalJobData, FinalJobResult>;
 
   public constructor(
     articleRepository: ArticleRepository,
