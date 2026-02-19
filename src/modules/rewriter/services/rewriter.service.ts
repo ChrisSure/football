@@ -22,12 +22,6 @@ export class AiRewriterService implements RewriterService {
       temperature: 0.7,
     });
 
-    const rewritten = response.choices[0]?.message?.content?.trim();
-
-    if (!rewritten) {
-      throw new Error(`[Rewriter] AI returned empty response for title: "${title}"`);
-    }
-
-    return rewritten;
+    return response.choices[0]?.message?.content?.trim() || '';
   }
 }

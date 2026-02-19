@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import { createDbProvider } from './core/db/providers';
+import { logger } from './core/logger';
 import type { DbProvider } from './core/db/types';
 import { createQueueProvider } from './core/queue/providers';
 import type { QueueProvider } from './core/queue/types';
@@ -23,18 +24,21 @@ const initQueueProvider = (): QueueProvider => {
 };
 
 export const startServer = async (): Promise<void> => {
-  const db = await initDatabase();
-  const queueProvider = initQueueProvider();
+  try {
+    const db = await initDatabase();
+    const queueProvider = initQueueProvider();
 
-  await startCollector(db, queueProvider);
-  await startDeduplicator(db, queueProvider);
-  await startRewriter(db, queueProvider);
-  await startSender(db, queueProvider);
+    await startCollector(db, queueProvider);
+    await startDeduplicator(db, queueProvider);
+    await startRewriter(db, queueProvider);
+    await startSender(db, queueProvider);
+  } catch (err: unknown) {
+    logger.error(`${err}`);
+  }
 
   const port: number = Number(process.env.PORT ?? 3000);
-
   app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    logger.info(`Server running on port ${port}`);
   });
 };
 
