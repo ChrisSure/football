@@ -1,6 +1,7 @@
 import type { TelegramProvider } from '../../../core/telegram/types';
 import type { FinalJobData } from '../../../core/queue/types';
 import type { SenderService } from '../types';
+import { TITLE_EMOJIS } from '../constants/emojis.constant';
 
 export class TelegramSenderService implements SenderService {
   private readonly telegramProvider: TelegramProvider;
@@ -24,8 +25,17 @@ export class TelegramSenderService implements SenderService {
     }
   }
 
+  private getRandomEmoji(): string {
+    return TITLE_EMOJIS[Math.floor(Math.random() * TITLE_EMOJIS.length)];
+  }
+
   private formatCaption(data: FinalJobData): string {
-    const lines: string[] = [`<b>${data.title}</b>`, '', `Source: ${data.source}`];
+    const emoji = this.getRandomEmoji();
+    const lines: string[] = [
+      `<b>${emoji} ${data.title} ${emoji}</b>`,
+      '',
+      `Source: ${data.source}`,
+    ];
 
     return lines.join('\n');
   }
