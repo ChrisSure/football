@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express, { type Request, type Response } from 'express';
 import { createDbProvider } from './core/db/providers';
-import { logger } from './core/logger';
+import { logger } from './core/logger/providers';
 import type { DbProvider } from './core/db/types';
 import { createQueueProvider } from './core/queue/providers';
 import type { QueueProvider } from './core/queue/types';

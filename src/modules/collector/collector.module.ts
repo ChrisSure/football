@@ -1,5 +1,5 @@
 import type { Source, SourceRepository } from '../../core/db/types';
-import { logger } from '../../core/logger';
+import { logger } from '../../core/logger/providers';
 import type {
   CollectorJobData,
   CollectorJobResult,
