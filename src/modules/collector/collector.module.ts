@@ -1,5 +1,5 @@
 import type { Source, SourceRepository } from '../../core/db/types';
-import { logger } from '../../core/logger';
+import { logger } from '../../core/logger/providers';
 import type {
   CollectorJobData,
   CollectorJobResult,
@@ -16,6 +16,7 @@ import {
   COLLECTOR_REPEAT_INTERVAL_1_MIN,
   TIMER_QUEUE_NAME,
 } from '../../core/queue/constants/timer/timer.constant';
+import { TribalScraper } from './scrapers/tribal/tribal.scrapper';
 
 export class Collector {
   private readonly sourceRepository: SourceRepository;
@@ -59,6 +60,11 @@ export class Collector {
     switch (source.key) {
       case SourceKey.Football: {
         const scraper = new FootballScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.Tribal: {
+        const scraper = new TribalScraper(this.scraperProvider, this.articleQueue);
         await scraper.scrap(source);
         break;
       }
