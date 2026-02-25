@@ -29,9 +29,9 @@ export const startServer = async (): Promise<void> => {
     const queueProvider = initQueueProvider();
 
     await startCollector(db, queueProvider);
-    await startDeduplicator(db, queueProvider);
-    await startRewriter(db, queueProvider);
-    await startSender(db, queueProvider);
+    //await startDeduplicator(db, queueProvider);
+    //await startRewriter(db, queueProvider);
+    //await startSender(db, queueProvider);
   } catch (err: unknown) {
     logger.error(`${err}`);
   }

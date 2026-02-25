@@ -17,6 +17,7 @@ import {
   TIMER_QUEUE_NAME,
 } from '../../core/queue/constants/timer/timer.constant';
 import { TribalScraper } from './scrapers/tribal/tribal.scrapper';
+import { GoalScraper } from './scrapers/goal/goal.scrapper';
 
 export class Collector {
   private readonly sourceRepository: SourceRepository;
@@ -65,6 +66,11 @@ export class Collector {
       }
       case SourceKey.Tribal: {
         const scraper = new TribalScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.Gaol: {
+        const scraper = new GoalScraper(this.scraperProvider, this.articleQueue);
         await scraper.scrap(source);
         break;
       }
