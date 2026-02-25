@@ -18,6 +18,7 @@ import {
 } from '../../core/queue/constants/timer/timer.constant';
 import { TribalScraper } from './scrapers/tribal/tribal.scrapper';
 import { GoalScraper } from './scrapers/goal/goal.scrapper';
+import { BbcScraper } from './scrapers/bbc/bbc.scrapper';
 
 export class Collector {
   private readonly sourceRepository: SourceRepository;
@@ -71,6 +72,11 @@ export class Collector {
       }
       case SourceKey.Gaol: {
         const scraper = new GoalScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.BBC: {
+        const scraper = new BbcScraper(this.scraperProvider, this.articleQueue);
         await scraper.scrap(source);
         break;
       }
