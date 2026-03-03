@@ -9,7 +9,7 @@ import type {
 } from '../../core/queue/types';
 import { COLLECTOR_QUEUE_NAME } from '../../core/queue/constants/collector/collector.constant';
 import { FILTERED_QUEUE_NAME } from '../../core/queue/constants/filtered/filtered.constant';
-import type { DeduplicatorService, TranslationService } from './types';
+import type { ContentQualityService, DeduplicatorService, TranslationService } from './types';
 import { ArticleFilterService } from './services/article-filter.service';
 
 export class Deduplicator {
@@ -18,6 +18,7 @@ export class Deduplicator {
   private readonly articleFilter: ArticleFilterService;
   private readonly deduplicatorService: DeduplicatorService;
   private readonly translationService: TranslationService;
+  private readonly contentQualityService: ContentQualityService;
   private readonly filteredQueue: Queue<FilteredJobData, FilteredJobResult, string>;
 
   public constructor(
@@ -25,12 +26,14 @@ export class Deduplicator {
     queueProvider: QueueProvider,
     deduplicatorService: DeduplicatorService,
     translationService: TranslationService,
+    contentQualityService: ContentQualityService,
   ) {
     this.articleRepository = articleRepository;
     this.queueProvider = queueProvider;
     this.articleFilter = new ArticleFilterService();
     this.deduplicatorService = deduplicatorService;
     this.translationService = translationService;
+    this.contentQualityService = contentQualityService;
     this.filteredQueue = this.queueProvider.createQueue<FilteredJobData, FilteredJobResult>(
       FILTERED_QUEUE_NAME,
     );
@@ -54,6 +57,10 @@ export class Deduplicator {
     const translatedTitle = await this.translationService.translate(job.data.title);
 
     if (!this.checkFilter(translatedTitle)) {
+      return { processedAt: new Date().toISOString() };
+    }
+
+    if (!(await this.contentQualityService.isQualityContent(translatedTitle))) {
       return { processedAt: new Date().toISOString() };
     }
 

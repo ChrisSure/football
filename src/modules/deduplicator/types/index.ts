@@ -13,3 +13,7 @@ export interface DeduplicatorService {
 export interface TranslationService {
   translate(title: string): Promise<string>;
 }
+
+export interface ContentQualityService {
+  isQualityContent(title: string): Promise<boolean>;
+}

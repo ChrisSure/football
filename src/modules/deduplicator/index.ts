@@ -1,3 +1,3 @@
 export { Deduplicator } from './deduplicator.module';
-export { AiDeduplicatorService, AiTranslationService } from './services';
-export type { DeduplicatorService, TranslationService } from './types';
+export { AiDeduplicatorService, AiTranslationService, AiContentQualityService } from './services';
+export type { ContentQualityService, DeduplicatorService, TranslationService } from './types';
