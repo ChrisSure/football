@@ -2,7 +2,7 @@ import type { DbProvider } from '../core/db/types';
 import { MySqlArticleRepository } from '../core/db/repositories';
 import type { QueueProvider } from '../core/queue/types';
 import { createAiProvider } from '../core/ai/providers';
-import { Deduplicator, AiDeduplicatorService } from '../modules/deduplicator';
+import { Deduplicator, AiDeduplicatorService, AiTranslationService } from '../modules/deduplicator';
 
 export const startDeduplicator = async (
   db: DbProvider,
@@ -11,6 +11,12 @@ export const startDeduplicator = async (
   const articleRepository = new MySqlArticleRepository(db);
   const aiProvider = createAiProvider();
   const deduplicatorService = new AiDeduplicatorService(aiProvider);
-  const deduplicator = new Deduplicator(articleRepository, queueProvider, deduplicatorService);
+  const translationService = new AiTranslationService(aiProvider);
+  const deduplicator = new Deduplicator(
+    articleRepository,
+    queueProvider,
+    deduplicatorService,
+    translationService,
+  );
   await deduplicator.start();
 };

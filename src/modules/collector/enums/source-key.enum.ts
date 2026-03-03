@@ -3,4 +3,5 @@ export enum SourceKey {
   Tribal = 'tribal',
   Gaol = 'goal',
   BBC = 'bbc',
+  Talk = 'talk',
 }

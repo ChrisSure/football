@@ -19,6 +19,7 @@ import {
 import { TribalScraper } from './scrapers/tribal/tribal.scrapper';
 import { GoalScraper } from './scrapers/goal/goal.scrapper';
 import { BbcScraper } from './scrapers/bbc/bbc.scrapper';
+import { TalkScraper } from './scrapers/talk/talk.scrapper';
 
 export class Collector {
   private readonly sourceRepository: SourceRepository;
@@ -77,6 +78,11 @@ export class Collector {
       }
       case SourceKey.BBC: {
         const scraper = new BbcScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.Talk: {
+        const scraper = new TalkScraper(this.scraperProvider, this.articleQueue);
         await scraper.scrap(source);
         break;
       }
