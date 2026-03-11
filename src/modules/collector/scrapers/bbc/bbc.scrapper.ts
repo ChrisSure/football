@@ -25,7 +25,6 @@ export class BbcScraper implements Scraper {
     await Promise.all(
       links.map(async (link) => {
         const article = await this.parseArticle(link, source);
-        console.log(article, 'article');
         if (article) {
           await this.enqueueArticle(article);
         }
