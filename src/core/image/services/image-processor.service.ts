@@ -1,6 +1,6 @@
 import sharp from 'sharp';
-import { createCanvas, GlobalFonts, type SKRSContext2D } from '@napi-rs/canvas';
-import { FONT_PATH, FONT_FAMILY, IMAGE_STYLE } from '../constants/image.constant';
+import { createCanvas, GlobalFonts, loadImage, type SKRSContext2D } from '@napi-rs/canvas';
+import { FONT_PATH, FONT_FAMILY, IMAGE_STYLE, LOGO_PATH } from '../constants/image.constant';
 import type { ImageOverlayOptions, ImageStyleConfig } from '../types';
 
 GlobalFonts.registerFromPath(FONT_PATH, FONT_FAMILY);
@@ -16,11 +16,11 @@ export class ImageProcessorService {
     const { width, height } = this.style.dimensions;
 
     const baseImage = await this.fetchAndResize(options.imageUrl, width, height);
-    const overlay = this.createOverlay(width, height, options.title, options.source);
+    const overlay = await this.createOverlay(width, height, options.title, options.source);
 
     return sharp(baseImage)
       .composite([{ input: overlay, top: 0, left: 0 }])
-      .jpeg({ quality: 90 })
+      .jpeg({ quality: 95, chromaSubsampling: '4:4:4', mozjpeg: true })
       .toBuffer();
   }
 
@@ -34,11 +34,20 @@ export class ImageProcessorService {
     const arrayBuffer = await response.arrayBuffer();
 
     return sharp(Buffer.from(arrayBuffer))
-      .resize(width, height, { fit: 'cover', position: 'centre' })
+      .resize(width, height, {
+        fit: 'cover',
+        position: 'centre',
+        kernel: sharp.kernel.lanczos3,
+      })
       .toBuffer();
   }
 
-  private createOverlay(width: number, height: number, title: string, source: string): Buffer {
+  private async createOverlay(
+    width: number,
+    height: number,
+    title: string,
+    source: string,
+  ): Promise<Buffer> {
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
@@ -46,6 +55,7 @@ export class ImageProcessorService {
     const titleBounds = this.drawTitle(ctx, width, height, title);
     this.drawAccentBar(ctx, titleBounds, height);
     this.drawSource(ctx, height, source);
+    await this.drawLogo(ctx, width);
 
     return Buffer.from(canvas.toBuffer('image/png'));
   }
@@ -152,18 +162,21 @@ export class ImageProcessorService {
       const testLine = currentLine ? `${currentLine} ${word}` : word;
       const metrics = ctx.measureText(testLine);
 
-      if (metrics.width > maxWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
+      const result = this.processWord(
+        word,
+        testLine,
+        currentLine,
+        metrics.width,
+        maxWidth,
+        lines,
+        maxLines,
+      );
 
-        if (lines.length >= maxLines) {
-          const lastLine = lines[lines.length - 1];
-          lines[lines.length - 1] = `${lastLine}...`;
-          return lines;
-        }
-      } else {
-        currentLine = testLine;
+      if (result.shouldReturn) {
+        return this.truncateLastLine(lines);
       }
+
+      currentLine = result.currentLine;
     }
 
     if (currentLine) {
@@ -171,5 +184,60 @@ export class ImageProcessorService {
     }
 
     return lines;
+  }
+
+  private processWord(
+    word: string,
+    testLine: string,
+    currentLine: string,
+    testWidth: number,
+    maxWidth: number,
+    lines: string[],
+    maxLines: number,
+  ): { currentLine: string; shouldReturn: boolean } {
+    if (testWidth > maxWidth && currentLine) {
+      lines.push(currentLine);
+
+      if (lines.length >= maxLines) {
+        return { currentLine: word, shouldReturn: true };
+      }
+
+      return { currentLine: word, shouldReturn: false };
+    }
+
+    return { currentLine: testLine, shouldReturn: false };
+  }
+
+  private truncateLastLine(lines: string[]): string[] {
+    const lastLine = lines[lines.length - 1];
+    lines[lines.length - 1] = `${lastLine}...`;
+    return lines;
+  }
+
+  private async drawLogo(ctx: SKRSContext2D, canvasWidth: number): Promise<void> {
+    const logo = await loadImage(LOGO_PATH);
+    const logoMaxHeight = 80;
+    const logoMaxWidth = 200;
+    const padding = 24;
+
+    let logoWidth = logo.width;
+    let logoHeight = logo.height;
+
+    if (logoHeight > logoMaxHeight) {
+      const scale = logoMaxHeight / logoHeight;
+      logoHeight = logoMaxHeight;
+      logoWidth = logoWidth * scale;
+    }
+
+    if (logoWidth > logoMaxWidth) {
+      const scale = logoMaxWidth / logoWidth;
+      logoWidth = logoMaxWidth;
+      logoHeight = logoHeight * scale;
+    }
+
+    const x = canvasWidth - logoWidth - padding;
+    const y = padding;
+
+    ctx.drawImage(logo, x, y, logoWidth, logoHeight);
   }
 }
