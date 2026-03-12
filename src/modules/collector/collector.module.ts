@@ -52,7 +52,14 @@ export class Collector {
 
     if (sources.length) {
       for (const source of sources) {
-        await this.processSource(source);
+        try {
+          await this.processSource(source);
+        } catch (error) {
+          logger.error(
+            { error, sourceKey: source.key, sourceId: source.id },
+            'Failed to process source',
+          );
+        }
       }
     } else {
       logger.warn('Sources not found');

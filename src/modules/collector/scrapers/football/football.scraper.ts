@@ -13,6 +13,7 @@ export class FootballScraper implements Scraper {
   }
 
   public async scrap(source: Source): Promise<void> {
+    throw new Error('Football UA Error');
     const $ = await this.scraperProvider.getPage(source.link);
     const links = this.extractLinks($);
 
