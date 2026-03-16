@@ -3,7 +3,7 @@ import type { Source } from '../../../../core/db/types';
 import type { ScraperProvider } from '../../../../core/scraper/types';
 import type { Article, ArticleQueue, Scraper } from '../../types/scraper.types';
 
-export class FootballScraper implements Scraper {
+export class BbcScraper implements Scraper {
   private readonly scraperProvider: ScraperProvider;
   private readonly articleQueue: ArticleQueue;
 
@@ -13,19 +13,18 @@ export class FootballScraper implements Scraper {
   }
 
   public async scrap(source: Source): Promise<void> {
-    throw new Error('Football UA Error');
     const $ = await this.scraperProvider.getPage(source.link);
     const links = this.extractLinks($);
 
     if (links.length) {
-      await this.processLinks(links, source.title);
+      await this.processLinks(links, source);
     }
   }
 
-  private async processLinks(links: string[], sourceTitle: string): Promise<void> {
+  private async processLinks(links: string[], source: Source): Promise<void> {
     await Promise.all(
       links.map(async (link) => {
-        const article = await this.parseArticle(link, sourceTitle);
+        const article = await this.parseArticle(link, source);
         if (article) {
           await this.enqueueArticle(article);
         }
@@ -40,8 +39,8 @@ export class FootballScraper implements Scraper {
   private extractLinks($: CheerioAPI): string[] {
     const links: string[] = [];
 
-    $('.news-feed.main-news ul li a').each((_index, element) => {
-      const href = $(element).attr('href');
+    $('#main-content ul[role="list"] div[data-testid="promo"]').each((_index, element) => {
+      const href = $(element).find('a').first().attr('href');
       if (href) {
         links.push(href);
       }
@@ -50,15 +49,17 @@ export class FootballScraper implements Scraper {
     return links;
   }
 
-  private async parseArticle(link: string, sourceName: string): Promise<Article | null> {
-    const page = await this.scraperProvider.getPage(link);
-    const title = page('.author-article h1').html() ?? '';
-    const image = page('.author-article .article-photo img').attr('src') ?? '';
+  private async parseArticle(link: string, source: Source): Promise<Article | null> {
+    const baseUrl = new URL(source.link).origin;
+    const page = await this.scraperProvider.getPage(baseUrl + link);
+
+    const title = page('h1#main-heading span').html() ?? '';
+    const image = page('div[data-testid="image"] img').attr('src') ?? '';
 
     if (!title || !image) {
       return null;
     }
 
-    return { title, image, source: sourceName };
+    return { title, image, source: source.title };
   }
 }

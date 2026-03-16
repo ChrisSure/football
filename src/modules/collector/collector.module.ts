@@ -17,6 +17,9 @@ import {
   TIMER_QUEUE_NAME,
 } from '../../core/queue/constants/timer/timer.constant';
 import { TribalScraper } from './scrapers/tribal/tribal.scrapper';
+import { GoalScraper } from './scrapers/goal/goal.scrapper';
+import { BbcScraper } from './scrapers/bbc/bbc.scrapper';
+import { TalkScraper } from './scrapers/talk/talk.scrapper';
 
 export class Collector {
   private readonly sourceRepository: SourceRepository;
@@ -49,7 +52,14 @@ export class Collector {
 
     if (sources.length) {
       for (const source of sources) {
-        await this.processSource(source);
+        try {
+          await this.processSource(source);
+        } catch (error) {
+          logger.error(
+            { error, sourceKey: source.key, sourceId: source.id },
+            'Failed to process source',
+          );
+        }
       }
     } else {
       logger.warn('Sources not found');
@@ -65,6 +75,21 @@ export class Collector {
       }
       case SourceKey.Tribal: {
         const scraper = new TribalScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.Gaol: {
+        const scraper = new GoalScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.BBC: {
+        const scraper = new BbcScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.Talk: {
+        const scraper = new TalkScraper(this.scraperProvider, this.articleQueue);
         await scraper.scrap(source);
         break;
       }
