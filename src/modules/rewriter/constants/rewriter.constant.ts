@@ -4,3 +4,5 @@ export const REWRITER_SYSTEM_PROMPT: string =
   'The rewritten title must preserve the original meaning and context completely. ' +
   'Change the wording, structure, or phrasing, but do not alter the facts or tone. ' +
   'Return only the rewritten title in Ukrainian with no extra text, quotes, or explanation.';
+
+export const PROJECT_ID: number = 1;

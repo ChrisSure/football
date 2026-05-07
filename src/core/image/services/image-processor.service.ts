@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import { createCanvas, GlobalFonts, loadImage, type SKRSContext2D } from '@napi-rs/canvas';
 import { FONT_PATH, FONT_FAMILY, IMAGE_STYLE, LOGO_PATH } from '../constants/image.constant';
 import type { ImageOverlayOptions, ImageStyleConfig } from '../types';
+import { Source } from '../../db/types';
 
 GlobalFonts.registerFromPath(FONT_PATH, FONT_FAMILY);
 
@@ -46,7 +47,7 @@ export class ImageProcessorService {
     width: number,
     height: number,
     title: string,
-    source: string,
+    source: Source,
   ): Promise<Buffer> {
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
@@ -112,14 +113,14 @@ export class ImageProcessorService {
     return { startY, height: totalTextHeight };
   }
 
-  private drawSource(ctx: SKRSContext2D, height: number, source: string): void {
+  private drawSource(ctx: SKRSContext2D, height: number, source: Source): void {
     const { padding, sourceFontSize, fontFamily } = this.style.text;
 
     ctx.font = `${sourceFontSize}px ${fontFamily}`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.textBaseline = 'bottom';
 
-    const text = `Джерело: ${source}`;
+    const text = `Джерело: ${source.title}`;
     this.drawTextWithShadow(ctx, text, padding, height - padding);
   }
 

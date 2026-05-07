@@ -1,16 +1,16 @@
 import type { BaseModel } from '../basic/db.types';
 
 export enum SourceStatus {
-  Active = 'Active',
-  Stopped = 'Stopped',
-  New = 'New',
+  Active = 'active',
+  Stopped = 'stopped',
+  New = 'new',
 }
 
 export interface Source extends BaseModel<number> {
   id: number;
   title: string;
   key: string;
-  link: string;
+  url: string;
   created: Date;
   status: SourceStatus;
 }

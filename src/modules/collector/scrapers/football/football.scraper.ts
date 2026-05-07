@@ -13,19 +13,18 @@ export class FootballScraper implements Scraper {
   }
 
   public async scrap(source: Source): Promise<void> {
-    throw new Error('Football UA Error');
-    const $ = await this.scraperProvider.getPage(source.link);
+    const $ = await this.scraperProvider.getPage(source.url);
     const links = this.extractLinks($);
 
     if (links.length) {
-      await this.processLinks(links, source.title);
+      await this.processLinks(links, source);
     }
   }
 
-  private async processLinks(links: string[], sourceTitle: string): Promise<void> {
+  private async processLinks(links: string[], source: Source): Promise<void> {
     await Promise.all(
       links.map(async (link) => {
-        const article = await this.parseArticle(link, sourceTitle);
+        const article = await this.parseArticle(link, source);
         if (article) {
           await this.enqueueArticle(article);
         }
@@ -50,7 +49,7 @@ export class FootballScraper implements Scraper {
     return links;
   }
 
-  private async parseArticle(link: string, sourceName: string): Promise<Article | null> {
+  private async parseArticle(link: string, source: Source): Promise<Article | null> {
     const page = await this.scraperProvider.getPage(link);
     const title = page('.author-article h1').html() ?? '';
     const image = page('.author-article .article-photo img').attr('src') ?? '';
@@ -59,6 +58,6 @@ export class FootballScraper implements Scraper {
       return null;
     }
 
-    return { title, image, source: sourceName };
+    return { title, image, source: source };
   }
 }

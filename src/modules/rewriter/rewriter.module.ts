@@ -7,12 +7,13 @@ import type {
   QueueProvider,
 } from '../../core/queue/types';
 import type { AiProvider } from '../../core/ai/types';
-import type { Article, ArticleRepository } from '../../core/db/types';
+import type { Article, ArticleRepository, Source } from '../../core/db/types';
 import { FILTERED_QUEUE_NAME } from '../../core/queue/constants/filtered/filtered.constant';
 import { FINAL_QUEUE_NAME } from '../../core/queue/constants/final/final.constant';
 import { ArticleStatus } from '../../core/db/enums';
 import { AiRewriterService } from './services';
 import type { RewriterService } from './types';
+import { PROJECT_ID } from './constants/rewriter.constant';
 
 export class Rewriter {
   private readonly queueProvider: QueueProvider;
@@ -50,7 +51,7 @@ export class Rewriter {
   ): Promise<FilteredJobResult> {
     const rewrittenTitle = await this.rewriterService.rewriteTitle(job.data.title);
     const article = this.buildArticle(rewrittenTitle, job.data);
-    await this.saveArticle(article);
+    await this.saveArticle(article, job.data.source);
     return { processedAt: new Date().toISOString(), rewrittenTitle };
   }
 
@@ -61,17 +62,21 @@ export class Rewriter {
     return {
       title: rewrittenTitle,
       image: data.image,
-      source: data.source,
+      source_id: data.source.id,
+      project_id: PROJECT_ID,
       status: ArticleStatus.New,
     };
   }
 
-  private async saveArticle(article: Omit<Article, 'id' | 'created'>): Promise<void> {
+  private async saveArticle(
+    article: Omit<Article, 'id' | 'created'>,
+    source: Source,
+  ): Promise<void> {
     await this.articleRepository.create(article);
     await this.finalQueue.add('article', {
       title: article.title,
       image: article.image,
-      source: article.source,
+      source: source,
     });
   }
 }
