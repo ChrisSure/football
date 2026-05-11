@@ -46,7 +46,7 @@ export class TelegramSenderService implements SenderService {
     const lines: string[] = [
       `<b>${emoji} ${data.title} ${emoji}</b>`,
       '',
-      `<i>Джерело: ${data.source}</i>`,
+      `<i>Джерело: ${data?.source?.title || 'Невідоме'}</i>`,
     ];
 
     return lines.join('\n');

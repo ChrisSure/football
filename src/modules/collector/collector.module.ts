@@ -66,7 +66,6 @@ export class Collector {
   }
 
   private async processSource(source: Source): Promise<void> {
-    console.log(source, 2);
     switch (source.key) {
       case SourceKey.Football: {
         const scraper = new FootballScraper(this.scraperProvider, this.articleQueue);
