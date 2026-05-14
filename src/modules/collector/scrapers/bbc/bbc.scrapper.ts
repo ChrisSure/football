@@ -13,7 +13,7 @@ export class BbcScraper implements Scraper {
   }
 
   public async scrap(source: Source): Promise<void> {
-    const $ = await this.scraperProvider.getPage(source.link);
+    const $ = await this.scraperProvider.getPage(source.url);
     const links = this.extractLinks($);
 
     if (links.length) {
@@ -50,7 +50,7 @@ export class BbcScraper implements Scraper {
   }
 
   private async parseArticle(link: string, source: Source): Promise<Article | null> {
-    const baseUrl = new URL(source.link).origin;
+    const baseUrl = new URL(source.url).origin;
     const page = await this.scraperProvider.getPage(baseUrl + link);
 
     const title = page('h1#main-heading span').html() ?? '';
@@ -60,6 +60,6 @@ export class BbcScraper implements Scraper {
       return null;
     }
 
-    return { title, image, source: source.title };
+    return { title, image, source: source };
   }
 }

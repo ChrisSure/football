@@ -1,6 +1,6 @@
 import type { Article, DbProvider } from '../../types';
 import { ArticleRepository } from '../../types';
-import { ARTICLES_TABLE } from '../../constants/repository/article.constant';
+import { ARTICLES_TABLE, PROJECT_ID } from '../../constants/repository/article.constant';
 import { ArticleStatus } from '../../enums';
 
 export class MySqlArticleRepository implements ArticleRepository {
@@ -11,7 +11,7 @@ export class MySqlArticleRepository implements ArticleRepository {
   }
 
   public async getLastActiveAll(hours: number): Promise<readonly Article[]> {
-    const query: string = `SELECT * FROM ${ARTICLES_TABLE} WHERE created >= NOW() - INTERVAL ? HOUR AND status = ?`;
+    const query: string = `SELECT * FROM ${ARTICLES_TABLE} WHERE created >= NOW() - INTERVAL ? HOUR AND status = ? AND project_id=${PROJECT_ID}`;
     const result = await this.db.query(query, [hours, ArticleStatus.Published]);
 
     if (Array.isArray(result)) {
@@ -22,12 +22,12 @@ export class MySqlArticleRepository implements ArticleRepository {
   }
 
   public async create(data: Omit<Article, 'id' | 'created'>): Promise<void> {
-    const query: string = `INSERT INTO ${ARTICLES_TABLE} (title, image, source, status) VALUES (?, ?, ?, ?)`;
-    await this.db.query(query, [data.title, data.image, data.source, data.status]);
+    const query: string = `INSERT INTO ${ARTICLES_TABLE} (title, image, source_id, project_id, status) VALUES (?, ?, ?, ?, ?)`;
+    await this.db.query(query, [data.title, data.image, data.source_id, PROJECT_ID, data.status]);
   }
 
   public async updateLastStatuses(hours: number): Promise<void> {
-    const query: string = `UPDATE ${ARTICLES_TABLE} SET status = ? WHERE created >= NOW() - INTERVAL ? HOUR`;
+    const query: string = `UPDATE ${ARTICLES_TABLE} SET status = ? WHERE created >= NOW() - INTERVAL ? HOUR AND project_id=${PROJECT_ID}`;
     await this.db.query(query, [ArticleStatus.Published, hours]);
   }
 }

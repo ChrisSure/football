@@ -1,6 +1,8 @@
+import { Source } from '../../db/types';
+
 export interface ImageOverlayOptions {
   title: string;
-  source: string;
+  source: Source;
   imageUrl: string;
 }
 

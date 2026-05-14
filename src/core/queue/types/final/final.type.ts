@@ -1,7 +1,9 @@
+import { Source } from '../../../db/types';
+
 export interface FinalJobData {
   title: string;
   image: string;
-  source: string;
+  source: Source;
 }
 
 export interface FinalJobResult {

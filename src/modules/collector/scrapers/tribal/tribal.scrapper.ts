@@ -13,7 +13,7 @@ export class TribalScraper implements Scraper {
   }
 
   public async scrap(source: Source): Promise<void> {
-    const $ = await this.scraperProvider.getPage(source.link);
+    const $ = await this.scraperProvider.getPage(source.url);
     const links = this.extractLinks($);
 
     if (links.length) {
@@ -53,7 +53,7 @@ export class TribalScraper implements Scraper {
   }
 
   private async parseArticle(link: string, source: Source): Promise<Article | null> {
-    const page = await this.scraperProvider.getPage(source.link + link);
+    const page = await this.scraperProvider.getPage(source.url + link);
 
     const title = page('.container__main h1').html() ?? '';
     const image = page('.container__main img').attr('src') ?? '';
@@ -62,6 +62,6 @@ export class TribalScraper implements Scraper {
       return null;
     }
 
-    return { title, image, source: source.title };
+    return { title, image, source: source };
   }
 }

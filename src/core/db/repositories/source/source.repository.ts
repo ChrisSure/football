@@ -1,6 +1,6 @@
 import type { DbProvider, Source, SourceRepository } from '../../types';
 import { SourceStatus } from '../../types';
-import { SOURCES_TABLE } from '../../constants/repository/source.constant';
+import { PROJECT_ID, SOURCES_TABLE } from '../../constants/repository/source.constant';
 
 export class MySqlSourceRepository implements SourceRepository {
   private readonly db: DbProvider;
@@ -10,7 +10,7 @@ export class MySqlSourceRepository implements SourceRepository {
   }
 
   public async getLastActive(): Promise<readonly Source[]> {
-    const query: string = `SELECT * FROM ${SOURCES_TABLE} WHERE status = ?`;
+    const query: string = `SELECT * FROM ${SOURCES_TABLE} WHERE status = ? AND project_id=${PROJECT_ID}`;
     const result = await this.db.query(query, [SourceStatus.Active]);
 
     if (Array.isArray(result)) {

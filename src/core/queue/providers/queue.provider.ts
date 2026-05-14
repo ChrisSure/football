@@ -1,4 +1,5 @@
 import { Queue, Worker } from 'bullmq';
+import IORedis, { type Redis } from 'ioredis';
 
 import { SAMPLE_QUEUE_NAME } from '../constants/queue/queue.constant';
 import { getQueueRedisConfigFromEnv } from '../helpers/queue.helpers';
@@ -13,11 +14,14 @@ import type {
 } from '../types';
 
 export class BullMqProvider implements QueueProvider {
-  private readonly connection: QueueRedisConfig;
+  private readonly connection: Redis;
   private readonly closeHandlers: Set<() => Promise<void>> = new Set();
 
-  public constructor(connection: QueueRedisConfig) {
-    this.connection = connection;
+  public constructor(config: QueueRedisConfig) {
+    this.connection = new IORedis(config);
+    this.closeHandlers.add(async () => {
+      await this.connection.quit();
+    });
   }
 
   public createQueue<TData, TResult>(

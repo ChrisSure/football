@@ -12,5 +12,5 @@ export interface Scraper {
 export interface Article {
   title: string;
   image: string;
-  source: string;
+  source: Source;
 }

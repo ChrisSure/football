@@ -18,5 +18,6 @@ export const getQueueRedisConfigFromEnv = (): QueueRedisConfig => {
     password: emptyToUndefined(process.env.QUEUE_REDIS_PASSWORD ?? DEFAULT_EMPTY),
     db,
     tls: tlsEnabled ? {} : undefined,
+    maxRetriesPerRequest: null,
   };
 };

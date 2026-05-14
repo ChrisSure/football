@@ -10,7 +10,7 @@ import type {
 import { COLLECTOR_QUEUE_NAME } from '../../core/queue/constants/collector/collector.constant';
 import { FILTERED_QUEUE_NAME } from '../../core/queue/constants/filtered/filtered.constant';
 import type { ContentQualityService, DeduplicatorService, TranslationService } from './types';
-import { ArticleFilterService } from './services/article-filter.service';
+import { ArticleFilterService } from './services';
 
 export class Deduplicator {
   private readonly articleRepository: ArticleRepository;

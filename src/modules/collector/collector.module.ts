@@ -13,7 +13,7 @@ import { FootballScraper } from './scrapers/football/football.scraper';
 import type { ArticleQueue } from './types/scraper.types';
 import { COLLECTOR_QUEUE_NAME } from '../../core/queue/constants/collector/collector.constant';
 import {
-  COLLECTOR_REPEAT_INTERVAL_1_MIN,
+  COLLECTOR_REPEAT_INTERVAL,
   TIMER_QUEUE_NAME,
 } from '../../core/queue/constants/timer/timer.constant';
 import { TribalScraper } from './scrapers/tribal/tribal.scrapper';
@@ -41,9 +41,8 @@ export class Collector {
   }
 
   public async start(): Promise<void> {
-    // TODO Temporary commented timer
-    //await this.scheduleRepeatableJob();
-    //this.registerWorker();
+    await this.scheduleRepeatableJob();
+    this.registerWorker();
     await this.run();
   }
 
@@ -56,7 +55,7 @@ export class Collector {
           await this.processSource(source);
         } catch (error) {
           logger.error(
-            { error, sourceKey: source.key, sourceId: source.id },
+            { err: error, sourceKey: source.key, sourceId: source.id },
             'Failed to process source',
           );
         }
@@ -111,7 +110,7 @@ export class Collector {
     await queue.add(
       'collector-run',
       { triggeredAt: new Date().toISOString() },
-      { repeat: { every: COLLECTOR_REPEAT_INTERVAL_1_MIN } },
+      { repeat: { every: COLLECTOR_REPEAT_INTERVAL } },
     );
   }
 }

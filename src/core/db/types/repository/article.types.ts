@@ -6,7 +6,8 @@ export interface Article extends BaseModel<EntityId> {
   title: string;
   image: string;
   created: Date;
-  source: string;
+  source_id: number;
+  project_id: number;
   status: ArticleStatus;
 }
 
