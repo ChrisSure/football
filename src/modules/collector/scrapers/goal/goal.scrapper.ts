@@ -50,8 +50,8 @@ export class GoalScraper implements Scraper {
   }
 
   private async parseArticle(link: string, source: Source): Promise<Article | null> {
-    const baseUrl = new URL(source.url).origin;
-    const page = await this.scraperProvider.getPage(baseUrl + link);
+    const articleUrl = new URL(link, source.url).toString();
+    const page = await this.scraperProvider.getPage(articleUrl);
 
     const title = page('h1[data-testid="article-title"]').html() ?? '';
     const image = page('div[data-testid="media-image"] img').attr('src') ?? '';
