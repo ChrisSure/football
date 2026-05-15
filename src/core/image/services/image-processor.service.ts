@@ -34,25 +34,61 @@ export class ImageProcessorService {
     }
 
     if (url.startsWith('data:')) {
-      throw new Error('Image URL is a data URI placeholder');
+      throw new Error(`Image URL is a data URI placeholder (got "${this.preview(rawUrl)}")`);
     }
+
+    const candidates: string[] = [];
 
     if (url.startsWith('//')) {
-      return `https:${url}`;
+      candidates.push(`https:${url}`);
+    } else {
+      candidates.push(url);
     }
 
+    for (const candidate of candidates) {
+      const parsed = this.tryParseUrl(candidate);
+      if (parsed) {
+        return parsed;
+      }
+    }
+
+    const resolved = this.tryParseUrl(url, sourceUrl);
+    if (resolved) {
+      return resolved;
+    }
+
+    throw new Error(
+      `Image URL could not be normalized (got "${this.preview(rawUrl)}", base "${this.preview(sourceUrl)}")`,
+    );
+  }
+
+  private tryParseUrl(input: string, base?: string): string | null {
     try {
-      return new URL(url).toString();
+      return base ? new URL(input, base).toString() : new URL(input).toString();
     } catch {
-      return new URL(url, sourceUrl).toString();
+      return null;
     }
   }
 
+  private preview(value: string): string {
+    const trimmed = value?.trim?.() ?? '';
+    return trimmed.length > 120 ? `${trimmed.slice(0, 120)}...` : trimmed;
+  }
+
   private async fetchAndResize(url: string, width: number, height: number): Promise<Buffer> {
-    const response = await fetch(url);
+    let response: Response;
+
+    try {
+      response = await fetch(url);
+    } catch (cause: unknown) {
+      const message = cause instanceof Error ? cause.message : String(cause);
+      throw new Error(`Failed to fetch image at "${this.preview(url)}": ${message}`);
+    }
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch image at "${this.preview(url)}": ${response.status} ${response.statusText}`,
+      );
     }
 
     const arrayBuffer = await response.arrayBuffer();
