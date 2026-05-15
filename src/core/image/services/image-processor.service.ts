@@ -16,13 +16,36 @@ export class ImageProcessorService {
   public async process(options: ImageOverlayOptions): Promise<Buffer> {
     const { width, height } = this.style.dimensions;
 
-    const baseImage = await this.fetchAndResize(options.imageUrl, width, height);
+    const safeUrl = this.normalizeImageUrl(options.imageUrl, options.source.url);
+    const baseImage = await this.fetchAndResize(safeUrl, width, height);
     const overlay = await this.createOverlay(width, height, options.title, options.source);
 
     return sharp(baseImage)
       .composite([{ input: overlay, top: 0, left: 0 }])
       .jpeg({ quality: 95, chromaSubsampling: '4:4:4', mozjpeg: true })
       .toBuffer();
+  }
+
+  private normalizeImageUrl(rawUrl: string, sourceUrl: string): string {
+    const url = rawUrl.trim();
+
+    if (!url) {
+      throw new Error('Image URL is empty');
+    }
+
+    if (url.startsWith('data:')) {
+      throw new Error('Image URL is a data URI placeholder');
+    }
+
+    if (url.startsWith('//')) {
+      return `https:${url}`;
+    }
+
+    try {
+      return new URL(url).toString();
+    } catch {
+      return new URL(url, sourceUrl).toString();
+    }
   }
 
   private async fetchAndResize(url: string, width: number, height: number): Promise<Buffer> {
