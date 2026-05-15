@@ -50,8 +50,8 @@ export class TalkScraper implements Scraper {
   }
 
   private async parseArticle(link: string, source: Source): Promise<Article | null> {
-    const baseUrl = new URL(source.url).origin;
-    const page = await this.scraperProvider.getPage(baseUrl + link);
+    const articleUrl = new URL(link, source.url).toString();
+    const page = await this.scraperProvider.getPage(articleUrl);
 
     const title = page('.article__header h1').html() ?? '';
     const image = page('.article-top-mobile__image img').attr('src') ?? '';
