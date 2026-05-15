@@ -1,21 +1,12 @@
+import cron from 'node-cron';
 import type { Source, SourceRepository } from '../../core/db/types';
 import { logger } from '../../core/logger/providers';
-import type {
-  CollectorJobData,
-  CollectorJobResult,
-  QueueProvider,
-  TimerJobData,
-  TimerJobResult,
-} from '../../core/queue/types';
+import type { CollectorJobData, CollectorJobResult, QueueProvider } from '../../core/queue/types';
 import type { ScraperProvider } from '../../core/scraper/types';
 import { SourceKey } from './enums';
 import { FootballScraper } from './scrapers/football/football.scraper';
 import type { ArticleQueue } from './types/scraper.types';
 import { COLLECTOR_QUEUE_NAME } from '../../core/queue/constants/collector/collector.constant';
-import {
-  COLLECTOR_REPEAT_INTERVAL,
-  TIMER_QUEUE_NAME,
-} from '../../core/queue/constants/timer/timer.constant';
 import { TribalScraper } from './scrapers/tribal/tribal.scrapper';
 import { GoalScraper } from './scrapers/goal/goal.scrapper';
 import { BbcScraper } from './scrapers/bbc/bbc.scrapper';
@@ -41,9 +32,12 @@ export class Collector {
   }
 
   public async start(): Promise<void> {
-    await this.scheduleRepeatableJob();
-    this.registerWorker();
     await this.run();
+
+    const cronExpression = process.env.COLLECTOR_CRON_SCHEDULE || '0 * * * *';
+    cron.schedule(cronExpression, async () => {
+      await this.run();
+    });
   }
 
   private async run(): Promise<void> {
@@ -95,22 +89,5 @@ export class Collector {
       default:
         logger.warn({ sourceKey: source.key }, 'Unknown source key');
     }
-  }
-
-  private registerWorker(): void {
-    this.queueProvider.createWorker<TimerJobData, TimerJobResult>(TIMER_QUEUE_NAME, async () => {
-      await this.run();
-      return { processedAt: new Date().toISOString() };
-    });
-  }
-
-  private async scheduleRepeatableJob(): Promise<void> {
-    const queue = this.queueProvider.createQueue<TimerJobData, TimerJobResult>(TIMER_QUEUE_NAME);
-
-    await queue.add(
-      'collector-run',
-      { triggeredAt: new Date().toISOString() },
-      { repeat: { every: COLLECTOR_REPEAT_INTERVAL } },
-    );
   }
 }
