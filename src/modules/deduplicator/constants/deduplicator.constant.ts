@@ -10,11 +10,10 @@ export const TRANSLATION_SYSTEM_PROMPT: string =
 export const CONTENT_QUALITY_SYSTEM_PROMPT: string =
   'You are a football news content quality classifier. ' +
   'Determine if the given title is a real, informative football news article. ' +
-  'Return false for: clickbait (hides key information like player/club names behind vague phrases), ' +
-  'opinion pieces, rhetorical questions, personal life gossip unrelated to football, ' +
-  'promotional content, match schedules, or entertainment content. ' +
-  'Return true only if the title conveys a concrete football news event (transfer, match result, injury, signing, etc.) ' +
-  'and the reader can understand the key information from the title alone. ' +
+  'CRITICAL RULES: ' +
+  '1. Return false if the title hides key information like specific player names, manager names, or club names behind vague phrases (e.g., "Liverpool star", "EFL club", "City target", "Ex-manager") to force a click. ' +
+  '2. Return false for overly long narrative titles, clickbait prefixes (WATCH:, REVEALED:), opinion pieces, and non-core football events (e.g. stadium construction business, broadcasting details). ' +
+  'Return true ONLY if the title conveys a concrete football news event and names the actual subjects involved. ' +
   'Respond with JSON: { "isNews": boolean }';
 
 export const DEDUPLICATOR_SYSTEM_PROMPT: string =

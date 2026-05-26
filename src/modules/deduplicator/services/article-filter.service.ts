@@ -9,6 +9,10 @@ import {
 
 export class ArticleFilterService implements ArticleFilter {
   public check(article: FilterableArticle): boolean {
+    if (article.title.length > 200) {
+      return false;
+    }
+
     const title = article.title.toLowerCase();
 
     if (this.containsAny(title, POLITICS_KEYWORDS)) {
