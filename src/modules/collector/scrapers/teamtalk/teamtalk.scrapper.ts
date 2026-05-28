@@ -3,7 +3,7 @@ import type { Source } from '../../../../core/db/types';
 import type { ScraperProvider } from '../../../../core/scraper/types';
 import type { Article, ArticleQueue, Scraper } from '../../types/scraper.types';
 
-export class BbcScraper implements Scraper {
+export class TeamtalkScraper implements Scraper {
   private readonly scraperProvider: ScraperProvider;
   private readonly articleQueue: ArticleQueue;
 
@@ -39,8 +39,8 @@ export class BbcScraper implements Scraper {
   private extractLinks($: CheerioAPI): string[] {
     const links: string[] = [];
 
-    $('#main-content ul[role="list"] div[data-testid="promo"]').each((_index, element) => {
-      const href = $(element).find('a').first().attr('href');
+    $('.ps-hero-small .news-card a').each((_index, element) => {
+      const href = $(element).attr('href');
       if (href) {
         links.push(href);
       }
@@ -50,11 +50,10 @@ export class BbcScraper implements Scraper {
   }
 
   private async parseArticle(link: string, source: Source): Promise<Article | null> {
-    const articleUrl = new URL(link, source.url).toString();
-    const page = await this.scraperProvider.getPage(articleUrl);
+    const page = await this.scraperProvider.getPage(link);
 
-    const title = page('h1#main-heading span').html() ?? '';
-    const image = page('div[data-testid="image"] img').attr('src') ?? '';
+    const title = page('.ps-article-content h1').html() ?? '';
+    const image = page('.ps-article img').attr('src') ?? '';
 
     if (!title || !image) {
       return null;

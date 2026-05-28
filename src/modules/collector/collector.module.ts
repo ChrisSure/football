@@ -9,8 +9,11 @@ import type { ArticleQueue } from './types/scraper.types';
 import { COLLECTOR_QUEUE_NAME } from '../../core/queue/constants/collector/collector.constant';
 import { TribalScraper } from './scrapers/tribal/tribal.scrapper';
 import { GoalScraper } from './scrapers/goal/goal.scrapper';
-import { BbcScraper } from './scrapers/bbc/bbc.scrapper';
 import { TalkScraper } from './scrapers/talk/talk.scrapper';
+import { SkySportScraper } from './scrapers/skysport/skysport.scrapper';
+import { TransferScraper } from './scrapers/transfer/transfer.scrapper';
+import { MarcaScraper } from './scrapers/marca/marca.scrapper';
+import { TeamtalkScraper } from './scrapers/teamtalk/teamtalk.scrapper';
 
 export class Collector {
   private readonly sourceRepository: SourceRepository;
@@ -34,10 +37,10 @@ export class Collector {
   public async start(): Promise<void> {
     await this.run();
 
-    const cronExpression = process.env.COLLECTOR_CRON_SCHEDULE || '0 * * * *';
+    /*const cronExpression = process.env.COLLECTOR_CRON_SCHEDULE || '0 * * * *';
     cron.schedule(cronExpression, async () => {
       await this.run();
-    });
+    });*/
   }
 
   private async run(): Promise<void> {
@@ -76,13 +79,28 @@ export class Collector {
         await scraper.scrap(source);
         break;
       }
-      case SourceKey.BBC: {
-        const scraper = new BbcScraper(this.scraperProvider, this.articleQueue);
+      case SourceKey.Talk: {
+        const scraper = new TalkScraper(this.scraperProvider, this.articleQueue);
         await scraper.scrap(source);
         break;
       }
-      case SourceKey.Talk: {
-        const scraper = new TalkScraper(this.scraperProvider, this.articleQueue);
+      case SourceKey.SkySport: {
+        const scraper = new SkySportScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.Transfer: {
+        const scraper = new TransferScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.Marca: {
+        const scraper = new MarcaScraper(this.scraperProvider, this.articleQueue);
+        await scraper.scrap(source);
+        break;
+      }
+      case SourceKey.Teamtalk: {
+        const scraper = new TeamtalkScraper(this.scraperProvider, this.articleQueue);
         await scraper.scrap(source);
         break;
       }

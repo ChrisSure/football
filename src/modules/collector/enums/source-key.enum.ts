@@ -4,4 +4,8 @@ export enum SourceKey {
   Gaol = 'goal',
   BBC = 'bbc',
   Talk = 'talk',
+  SkySport = 'skysport',
+  Transfer = 'transfer',
+  Marca = 'marca',
+  Teamtalk = 'teamtalk',
 }
