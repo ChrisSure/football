@@ -35,12 +35,12 @@ export class Collector {
   }
 
   public async start(): Promise<void> {
-    await this.run();
+    //await this.run();
 
-    /*const cronExpression = process.env.COLLECTOR_CRON_SCHEDULE || '0 * * * *';
+    const cronExpression = process.env.COLLECTOR_CRON_SCHEDULE || '0 * * * *';
     cron.schedule(cronExpression, async () => {
       await this.run();
-    });*/
+    });
   }
 
   private async run(): Promise<void> {
