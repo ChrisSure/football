@@ -30,4 +30,9 @@ export class MySqlArticleRepository implements ArticleRepository {
     const query: string = `UPDATE ${ARTICLES_TABLE} SET status = ? WHERE created >= NOW() - INTERVAL ? HOUR AND project_id=${PROJECT_ID}`;
     await this.db.query(query, [ArticleStatus.Published, hours]);
   }
+
+  public async deleteOlderThanDays(days: number): Promise<void> {
+    const query: string = `DELETE FROM ${ARTICLES_TABLE} WHERE created < NOW() - INTERVAL ? DAY AND project_id=${PROJECT_ID}`;
+    await this.db.query(query, [days]);
+  }
 }

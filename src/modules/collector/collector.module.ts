@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import type { Source, SourceRepository } from '../../core/db/types';
+import type { Source, SourceRepository, ArticleRepository } from '../../core/db/types';
 import { logger } from '../../core/logger/providers';
 import type { CollectorJobData, CollectorJobResult, QueueProvider } from '../../core/queue/types';
 import type { ScraperProvider } from '../../core/scraper/types';
@@ -17,16 +17,19 @@ import { TeamtalkScraper } from './scrapers/teamtalk/teamtalk.scrapper';
 
 export class Collector {
   private readonly sourceRepository: SourceRepository;
+  private readonly articleRepository: ArticleRepository;
   private readonly queueProvider: QueueProvider;
   private readonly scraperProvider: ScraperProvider;
   private readonly articleQueue: ArticleQueue;
 
   public constructor(
     sourceRepository: SourceRepository,
+    articleRepository: ArticleRepository,
     queueProvider: QueueProvider,
     scraperProvider: ScraperProvider,
   ) {
     this.sourceRepository = sourceRepository;
+    this.articleRepository = articleRepository;
     this.queueProvider = queueProvider;
     this.scraperProvider = scraperProvider;
     this.articleQueue = this.queueProvider.createQueue<CollectorJobData, CollectorJobResult>(
@@ -35,12 +38,24 @@ export class Collector {
   }
 
   public async start(): Promise<void> {
-    //await this.run();
-
     const cronExpression = process.env.COLLECTOR_CRON_SCHEDULE || '0 * * * *';
     cron.schedule(cronExpression, async () => {
       await this.run();
     });
+
+    const cleanupCronExpression = process.env.COLLECTOR_CLEANUP_CRON_SCHEDULE || '0 0 1 * *';
+    cron.schedule(cleanupCronExpression, async () => {
+      await this.cleanupOldArticles();
+    });
+  }
+
+  private async cleanupOldArticles(): Promise<void> {
+    try {
+      await this.articleRepository.deleteOlderThanDays(2);
+      logger.info('Successfully cleaned up old articles');
+    } catch (error) {
+      logger.error({ err: error }, 'Failed to clean up old articles');
+    }
   }
 
   private async run(): Promise<void> {
