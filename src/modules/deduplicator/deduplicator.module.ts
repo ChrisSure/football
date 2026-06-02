@@ -60,7 +60,7 @@ export class Deduplicator {
       return { processedAt: new Date().toISOString() };
     }
 
-    if (!(await this.contentQualityService.isQualityContent(translatedTitle))) {
+    if (!(await this.contentQualityService.isQualityContent(job.data.title, translatedTitle))) {
       return { processedAt: new Date().toISOString() };
     }
 

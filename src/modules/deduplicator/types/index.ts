@@ -15,5 +15,5 @@ export interface TranslationService {
 }
 
 export interface ContentQualityService {
-  isQualityContent(title: string): Promise<boolean>;
+  isQualityContent(originalTitle: string, translatedTitle: string): Promise<boolean>;
 }
