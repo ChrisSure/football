@@ -14,6 +14,10 @@ export const CONTENT_QUALITY_SYSTEM_PROMPT: string =
   '1. Return false if the title hides key information like specific player names, manager names, or club names behind vague phrases (e.g., "Liverpool star", "EFL club", "City target", "Ex-manager", "провідний гравець", "зірковий нападник"). ' +
   '2. Return false for overly long narrative titles, clickbait prefixes (WATCH:, REVEALED:, ТЕРМІНОВО:, ДИВІТЬСЯ:), opinion pieces, and non-core football events (e.g. stadium construction business, broadcasting details). ' +
   '3. Return false when the core event depends on unnamed subjects like "a player", "a winger", "a leading player", "гравець", "вінгер", "провідний гравець" without naming who that subject is. ' +
+  '4. Return false if the title mentions an action (e.g., "прокоментував"/"commented", "ухвалив рішення"/"decided", "зробив заяву"/"made a statement") but does not reveal its essence or details. ' +
+  '5. Return false if the title just lists interview topics or article subjects without concrete facts. ' +
+  '6. Return false if the title teases a "plan" ("план"), "squad" ("склад"), or "questions" ("питання") without providing specifics. ' +
+  '7. Return false if the title contains quotes or opinions without clearly identifying the author (e.g., "слова колеги"/"colleague\'s words", "товариш по команді"/"teammate"). ' +
   'Return true ONLY if the title conveys a concrete football news event and names the actual subjects involved. ' +
   'Respond with JSON: { "isNews": boolean }';
 
@@ -37,6 +41,7 @@ export const QUALITY_VAGUE_SUBJECT_PATTERNS: readonly RegExp[] = [
   /(?:^|[\s"«(])(?:гравець|вінгер|півзахисник|форвард|нападник|захисник)\s+за\s+\d+(?:[.,]\d+)?\s*(?:млн|мільйон(?:ів|и)?|€|\$|£|фунт(?:ів)?)(?=$|[\s,.:;!?»")])/i,
   /(?:^|[\s"«(])(?:клуб|команда)\s+(?:efl|апл|ла ліги|серії а|бундесліги)(?=$|[\s,.:;!?»")])/i,
   /(?:^|[\s"«(])(?:манчестер юнайтед|ліверпуль|арсенал|челсі|барселона|реал мадрид|псж|манчестер сіті)\s+(?:зірка|ціль|гравець|вінгер|півзахисник|форвард|нападник|захисник)(?=$|[\s,.:;!?»")])/i,
+  /(?:^|[\s"«(])(?:товариш по команді|колега|одноклубник|легенда|герой|teammate|colleague|clubmate|legend|hero)(?=$|[\s,.:;!?»")])/i,
 ];
 
 export const DEDUPLICATOR_SYSTEM_PROMPT: string =
