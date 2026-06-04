@@ -84,7 +84,7 @@ export class Deduplicator {
   }
 
   private getLatestArticles(): Promise<readonly Article[]> {
-    return this.articleRepository.getLastActiveAll(24);
+    return this.articleRepository.getLastActiveAll(120);
   }
 
   private async enqueueFiltered(job: Job<CollectorJobData, CollectorJobResult>): Promise<void> {
